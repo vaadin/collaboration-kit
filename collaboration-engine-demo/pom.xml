@@ -167,6 +167,7 @@
                 <dependency>
                     <groupId>com.vaadin</groupId>
                     <artifactId>flow-server-production-mode</artifactId>
+                    <version>${flow.version}</version>
                 </dependency>
             </dependencies>
 
@@ -175,6 +176,7 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>flow-maven-plugin</artifactId>
+                        <version>${flow.version}</version>
                         <executions>
                             <execution>
                                 <goals>
