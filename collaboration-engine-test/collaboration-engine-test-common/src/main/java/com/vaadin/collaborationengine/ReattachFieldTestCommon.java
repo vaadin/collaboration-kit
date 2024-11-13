@@ -28,6 +28,10 @@ public class ReattachFieldTestCommon
         ClientState client2 = new ClientState(addClient());
 
         client1.detachTextField();
+        // Value may or may not be propagated to the other client,
+        // but no exception should be thrown
+        client1.textField.setValue("bar");
+
         client2.detachTextField();
 
         client1.attachTextField();
