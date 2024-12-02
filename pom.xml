@@ -36,8 +36,8 @@
 
         <!-- Versions to keep in sync with the targeted platform version: -->
         <!-- spring,cdi versions has been moved to test module. -->
-        <flow.version>24.5-SNAPSHOT</flow.version>
-        <vaadin.component.version>24.5-SNAPSHOT</vaadin.component.version>
+        <flow.version>24.6-SNAPSHOT</flow.version>
+        <vaadin.component.version>24.6-SNAPSHOT</vaadin.component.version>
         <vaadin.lumo.version>${vaadin.component.version}</vaadin.lumo.version>
 
         <!-- Keep in sync with flow-server: -->
@@ -67,7 +67,7 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>license-checker</artifactId>
-                <version>1.13.0</version>
+                <version>1.13.3</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
