@@ -19,7 +19,7 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <!-- test dependencies versions -->
         <servlet-api.version>6.0.0</servlet-api.version>
-        <spring-boot.version>3.3.3</spring-boot.version>
+        <spring-boot.version>3.3.5</spring-boot.version>
         <flow.cdi.version>15.0-SNAPSHOT</flow.cdi.version>
         <testbench.version>9.3.4</testbench.version>
         <!-- selenium is so much verbose -->
