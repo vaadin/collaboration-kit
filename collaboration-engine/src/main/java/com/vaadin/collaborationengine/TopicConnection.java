@@ -118,8 +118,10 @@ public class TopicConnection {
                         cleanupScopedData();
                     }
                 }
-                actionDispatcher
-                        .dispatchAction(() -> contextFuture.complete(null));
+                if (actionDispatcher != null) {
+                    actionDispatcher
+                            .dispatchAction(() -> contextFuture.complete(null));
+                }
             });
             actionDispatcher
                     .dispatchAction(() -> distributor.accept(id, change));
@@ -142,8 +144,10 @@ public class TopicConnection {
                         cleanupScopedData();
                     }
                 }
-                actionDispatcher.dispatchAction(() -> contextFuture
-                        .complete(result != ChangeResult.REJECTED));
+                if (actionDispatcher != null) {
+                    actionDispatcher.dispatchAction(() -> contextFuture
+                            .complete(result != ChangeResult.REJECTED));
+                }
             });
             actionDispatcher
                     .dispatchAction(() -> distributor.accept(id, change));
@@ -345,8 +349,10 @@ public class TopicConnection {
                         cleanupScopedData();
                     }
                 }
-                actionDispatcher.dispatchAction(() -> contextFuture
-                        .complete(result != ChangeResult.REJECTED));
+                if (actionDispatcher != null) {
+                    actionDispatcher.dispatchAction(() -> contextFuture
+                            .complete(result != ChangeResult.REJECTED));
+                }
             });
             actionDispatcher
                     .dispatchAction(() -> distributor.accept(id, change));
