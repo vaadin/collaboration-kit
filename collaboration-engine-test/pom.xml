@@ -10,7 +10,7 @@
     <parent>
         <artifactId>collaboration-engine-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>6.3-SNAPSHOT</version>
+        <version>6.4-SNAPSHOT</version>
     </parent>
 
     <properties>
