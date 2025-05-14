@@ -21,7 +21,7 @@
         <servlet-api.version>6.0.0</servlet-api.version>
         <spring-boot.version>3.4.0</spring-boot.version>
         <flow.cdi.version>15.0-SNAPSHOT</flow.cdi.version>
-        <testbench.version>9.3.7</testbench.version>
+        <testbench.version>9.3.12</testbench.version>
         <!-- selenium is so much verbose -->
         <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     </properties>
