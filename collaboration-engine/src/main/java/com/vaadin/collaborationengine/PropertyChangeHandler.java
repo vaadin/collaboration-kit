@@ -17,6 +17,8 @@ package com.vaadin.collaborationengine;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 /**
  * Functional interface that defines how to handle value changes for properties
  * in a topic.
@@ -43,6 +45,36 @@ public interface PropertyChangeHandler extends Serializable {
          * @return the value, not {@code null}
          */
         Object getValue();
+
+        /**
+         * Gets the new value as an instance of the given class.
+         *
+         * @param type
+         *            the expected type of the returned instance
+         * @param <T>
+         *            the type of the value from <code>type</code> parameter, e.g.
+         *            <code>String</code>
+         * @return throws an {@link UnsupportedOperationException}
+         */
+        default <T> T getValue(Class<T> type) {
+            throw new UnsupportedOperationException(
+                    "This method is not implemented");
+        }
+
+        /**
+         * Gets the new value as an instance of the given type reference.
+         *
+         * @param typeRef
+         *            the expected type reference of the returned instance
+         * @param <T>
+         *            the type reference of the value from <code>typeRef</code> parameter, e.g.
+         *            <code>List<String>></code>
+         * @return throws an {@link UnsupportedOperationException}
+         */
+        default <T> T getValue(TypeReference<T> typeRef) {
+            throw new UnsupportedOperationException(
+                    "This method is not implemented");
+        }
     }
 
     /**
