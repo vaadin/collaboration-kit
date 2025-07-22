@@ -33,6 +33,7 @@ import org.junit.Test;
 import com.vaadin.collaborationengine.util.MockService;
 import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.ReflectionUtils;
+import com.vaadin.collaborationengine.util.TestDownloadHandler;
 import com.vaadin.collaborationengine.util.TestStreamResource;
 import com.vaadin.collaborationengine.util.TestUtils;
 import com.vaadin.flow.component.UI;
@@ -419,6 +420,72 @@ public class CollaborationAvatarGroupTest {
         client2.attach();
 
         client1.group.setImageProvider(null);
+
+        List<AvatarGroupItem> items = client1.getItems();
+        assertEquals(2, items.size());
+        AvatarGroupItem item = items.get(1);
+
+        Assert.assertNull(item.getImageResource());
+        assertEquals("image2", item.getImage());
+    }
+
+    @Test
+    public void imageHandler_beforeAttach_downloadHandlerIsUsed() {
+        UI.setCurrent(client1.ui);
+        client1.group.setImageHandler(user -> new TestDownloadHandler());
+        client1.attach();
+        client2.attach();
+
+        List<AvatarGroupItem> items = client1.getItems();
+        assertEquals(2, items.size());
+        AvatarGroupItem item = items.get(1);
+
+        Assert.assertThat(item.getImage(),
+                CoreMatchers.startsWith("VAADIN/dynamic"));
+        assertEquals("", item.getImageResource().getName());
+    }
+
+    @Test
+    public void imageHandler_afterAttach_downloadHandlerIsUsed() {
+        UI.setCurrent(client1.ui);
+        client1.attach();
+        client2.attach();
+
+        client1.group.setImageHandler(user -> new TestDownloadHandler());
+
+        List<AvatarGroupItem> items = client1.getItems();
+        assertEquals(2, items.size());
+        AvatarGroupItem item = items.get(1);
+
+        Assert.assertThat(item.getImage(),
+                CoreMatchers.startsWith("VAADIN/dynamic"));
+        assertEquals("", item.getImageResource().getName());
+    }
+
+    @Test
+    public void imageHandler_nullHandler_noImage() {
+        UI.setCurrent(client1.ui);
+        client1.attach();
+        client2.attach();
+
+        client1.group.setImageHandler(user -> null);
+
+        List<AvatarGroupItem> items = client1.getItems();
+        assertEquals(2, items.size());
+        AvatarGroupItem item = items.get(1);
+
+        Assert.assertNull(item.getImage());
+        Assert.assertNull(item.getImageResource());
+    }
+
+    @Test
+    public void imageHandler_clearHandler_imageIsSetFromUserInfo() {
+        UI.setCurrent(client1.ui);
+        client1.group.setImageHandler(user -> new TestDownloadHandler());
+        client1.attach();
+        client2.attach();
+
+        client1.group.setImageHandler(null);
 
         List<AvatarGroupItem> items = client1.getItems();
         assertEquals(2, items.size());

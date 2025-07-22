@@ -37,6 +37,7 @@ import org.junit.Test;
 import com.vaadin.collaborationengine.util.MockService;
 import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.ReflectionUtils;
+import com.vaadin.collaborationengine.util.TestDownloadHandler;
 import com.vaadin.collaborationengine.util.TestStreamResource;
 import com.vaadin.collaborationengine.util.TestUtils;
 import com.vaadin.flow.component.UI;
@@ -210,7 +211,7 @@ public class CollaborationMessageListTest {
     }
 
     private static List<String> blackListedMethods = Arrays.asList("getItems",
-            "setItems", "localeChange");
+            "setItems", "addItem", "localeChange");
 
     @Test
     public void messageList_replicateRelevantAPIs() {
@@ -514,6 +515,91 @@ public class CollaborationMessageListTest {
         client2.sendMessage("foo");
 
         client1.messageList.setImageProvider(null);
+
+        List<MessageListItem> items = client1.getMessages();
+        Assert.assertEquals(1, items.size());
+        MessageListItem item = items.get(0);
+
+        Assert.assertNull(item.getUserImageResource());
+        Assert.assertEquals("image2", item.getUserImage());
+    }
+
+    @Test
+    public void imageHandler_beforeAttach_downloadHandlerIsUsed() {
+        UI.setCurrent(client1.ui);
+        client1.messageList.setImageHandler(user -> new TestDownloadHandler());
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client2.sendMessage("foo");
+
+        List<MessageListItem> items = client1.getMessages();
+
+        Assert.assertEquals(1, items.size());
+        MessageListItem item = items.get(0);
+
+        Assert.assertThat(item.getUserImage(),
+                CoreMatchers.startsWith("VAADIN/dynamic"));
+        Assert.assertEquals("", item.getUserImageResource().getName());
+    }
+
+    @Test
+    public void imageHandler_afterAttach_downloadHandlerIsUsed() {
+        UI.setCurrent(client1.ui);
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client1.messageList.setImageHandler(user -> new TestDownloadHandler());
+
+        client2.sendMessage("foo");
+
+        List<MessageListItem> items = client1.getMessages();
+
+        Assert.assertEquals(1, items.size());
+        MessageListItem item = items.get(0);
+
+        Assert.assertThat(item.getUserImage(),
+                CoreMatchers.startsWith("VAADIN/dynamic"));
+        Assert.assertEquals("", item.getUserImageResource().getName());
+    }
+
+    @Test
+    public void imageHandler_nullDownloadHandler_noImage() {
+        UI.setCurrent(client1.ui);
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client1.messageList.setImageHandler(user -> null);
+
+        client2.sendMessage("foo");
+
+        List<MessageListItem> items = client1.getMessages();
+        Assert.assertEquals(1, items.size());
+
+        MessageListItem item = items.get(0);
+
+        Assert.assertNull(item.getUserImage());
+        Assert.assertNull(item.getUserImageResource());
+    }
+
+    @Test
+    public void imageHandler_clearHandler_imageIsSetFromUserInfo() {
+        UI.setCurrent(client1.ui);
+        client1.messageList.setImageHandler(user -> new TestDownloadHandler());
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client2.sendMessage("foo");
+
+        client1.messageList.setImageHandler(null);
 
         List<MessageListItem> items = client1.getMessages();
         Assert.assertEquals(1, items.size());
