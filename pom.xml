@@ -36,14 +36,14 @@
 
         <!-- Versions to keep in sync with the targeted platform version: -->
         <!-- spring,cdi versions has been moved to test module. -->
-        <flow.version>24.6-SNAPSHOT</flow.version>
-        <vaadin.component.version>24.6-SNAPSHOT</vaadin.component.version>
+        <flow.version>24.8-SNAPSHOT</flow.version>
+        <vaadin.component.version>24.8-SNAPSHOT</vaadin.component.version>
         <vaadin.lumo.version>${vaadin.component.version}</vaadin.lumo.version>
 
         <!-- Keep in sync with flow-server: -->
-        <jackson.version>2.17.1</jackson.version>
+        <jackson.version>2.19.1</jackson.version>
         <junit.version>4.13.2</junit.version>
-        <jetty.version>11.0.20</jetty.version>
+        <jetty.version>11.0.25</jetty.version>
 
         <!-- plugin versions -->
         <spotless.plugin.version>2.43.0</spotless.plugin.version>
