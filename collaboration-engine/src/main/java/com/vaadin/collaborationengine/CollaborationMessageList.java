@@ -331,6 +331,7 @@ public class CollaborationMessageList extends Composite<MessageList>
     public MessageConfigurator getMessageConfigurator() {
         return messageConfigurator;
     }
+
     /**
      * Wrapper method for {@link MessageList#setMarkdown(boolean)}. Sets whether
      * the messages should be parsed as markdown. By default this is set to

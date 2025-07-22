@@ -582,6 +582,7 @@ public class CollaborationMessageListTest {
     public void setAnnounceMessagesEnabled_announceMessagesIsEnabled() {
         client1.messageList.setAnnounceMessages(true);
         Assert.assertTrue(client1.messageList.isAnnounceMessages());
-        Assert.assertTrue(client1.messageList.getContent().isAnnounceMessages());
+        Assert.assertTrue(
+                client1.messageList.getContent().isAnnounceMessages());
     }
 }
