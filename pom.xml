@@ -41,9 +41,9 @@
         <vaadin.lumo.version>${vaadin.component.version}</vaadin.lumo.version>
 
         <!-- Keep in sync with flow-server: -->
-        <jackson.version>2.17.1</jackson.version>
+        <jackson.version>2.19.1</jackson.version>
         <junit.version>4.13.2</junit.version>
-        <jetty.version>11.0.20</jetty.version>
+        <jetty.version>11.0.25</jetty.version>
 
         <!-- plugin versions -->
         <spotless.plugin.version>2.43.0</spotless.plugin.version>

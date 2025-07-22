@@ -656,4 +656,19 @@ public class CollaborationMessageListTest {
         CollaborationMessageList deserializedMessageList = TestUtils
                 .serialize(messageList);
     }
+
+    @Test
+    public void setMarkdownEnabled_markdownIsEnabled() {
+        client1.messageList.setMarkdown(true);
+        Assert.assertTrue(client1.messageList.isMarkdown());
+        Assert.assertTrue(client1.messageList.getContent().isMarkdown());
+    }
+
+    @Test
+    public void setAnnounceMessagesEnabled_announceMessagesIsEnabled() {
+        client1.messageList.setAnnounceMessages(true);
+        Assert.assertTrue(client1.messageList.isAnnounceMessages());
+        Assert.assertTrue(
+                client1.messageList.getContent().isAnnounceMessages());
+    }
 }
