@@ -283,7 +283,7 @@ public class CollaborationMessageList extends Composite<MessageList>
      *            URLs directly from the user info object
      * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
      */
-    @Deprecated(since = "3.1.0", forRemoval = true)
+    @Deprecated(since = "6.5", forRemoval = true)
     public void setImageProvider(ImageProvider imageProvider) {
         this.imageProvider = imageProvider;
         refreshMessages();
@@ -298,7 +298,7 @@ public class CollaborationMessageList extends Composite<MessageList>
      *         callback is set
      * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
      */
-    @Deprecated(since = "3.1.0", forRemoval = true)
+    @Deprecated(since = "6.5", forRemoval = true)
     public ImageProvider getImageProvider() {
         return imageProvider;
     }
@@ -333,7 +333,7 @@ public class CollaborationMessageList extends Composite<MessageList>
      * @param imageHandler
      *            the image handler to use, or <code>null</code> to use image
      *            URLs directly from the user info object
-     * @since 3.1.0
+     * @since 6.5
      */
     public void setImageHandler(ImageHandler imageHandler) {
         this.imageHandler = imageHandler;
@@ -347,7 +347,7 @@ public class CollaborationMessageList extends Composite<MessageList>
      *
      * @return the current image handler callback, or <code>null</code> if no
      *         callback is set
-     * @since 3.1.0
+     * @since 6.5
      */
     public ImageHandler getImageHandler() {
         return imageHandler;

@@ -59,7 +59,7 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup>
      * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
      */
     @FunctionalInterface
-    @Deprecated(since = "3.1.0", forRemoval = true)
+    @Deprecated(since = "6.5", forRemoval = true)
     public interface ImageProvider {
         /**
          * Gets a stream resource that provides the avatar image for the given
@@ -82,7 +82,7 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup>
      *
      * @see DownloadHandler
      * @see CollaborationAvatarGroup#setImageHandler(ImageHandler)
-     * @since 3.1.0
+     * @since 6.5
      */
     @FunctionalInterface
     public interface ImageHandler {
@@ -343,7 +343,7 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup>
      * @since 1.0
      * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
      */
-    @Deprecated(since = "3.1.0", forRemoval = true)
+    @Deprecated(since = "6.5", forRemoval = true)
     public void setImageProvider(ImageProvider imageProvider) {
         this.imageProvider = imageProvider;
         refreshItems();
@@ -359,7 +359,7 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup>
      * @since 1.0
      * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
      */
-    @Deprecated(since = "3.1.0", forRemoval = true)
+    @Deprecated(since = "6.5", forRemoval = true)
     public ImageProvider getImageProvider() {
         return imageProvider;
     }
@@ -394,7 +394,7 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup>
      * @param imageHandler
      *            the image handler to use, or <code>null</code> to use image
      *            URLs directly from the user info object
-     * @since 3.1.0
+     * @since 6.5
      */
     public void setImageHandler(ImageHandler imageHandler) {
         this.imageHandler = imageHandler;
@@ -408,7 +408,7 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup>
      *
      * @return the current image handler callback, or <code>null</code> if no
      *         callback is set
-     * @since 3.1.0
+     * @since 6.5
      */
     public ImageHandler getImageHandler() {
         return imageHandler;
