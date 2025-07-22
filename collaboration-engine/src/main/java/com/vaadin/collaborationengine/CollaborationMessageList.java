@@ -331,6 +331,51 @@ public class CollaborationMessageList extends Composite<MessageList>
     public MessageConfigurator getMessageConfigurator() {
         return messageConfigurator;
     }
+    /**
+     * Wrapper method for {@link MessageList#setMarkdown(boolean)}. Sets whether
+     * the messages should be parsed as markdown. By default this is set to
+     * {@code false}.
+     *
+     * @param markdown
+     *            {@code true} if the message text is parsed as Markdown.
+     */
+    public void setMarkdown(boolean markdown) {
+        this.getContent().setMarkdown(markdown);
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#isMarkdown()}. Returns whether the
+     * messages are parsed as markdown.
+     *
+     * @return {@code true} if the message text is parsed as Markdown.
+     */
+    public boolean isMarkdown() {
+        return this.getContent().isMarkdown();
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#setAnnounceMessages(boolean)}. When
+     * set to {@code true}, new messages are announced to assistive technologies
+     * using ARIA live regions. By default, this is set to {@code false}.
+     *
+     * @param announceMessages
+     *            {@code true} if new messages should be announced to assistive
+     *            technologies.
+     */
+    public void setAnnounceMessages(boolean announceMessages) {
+        this.getContent().setAnnounceMessages(announceMessages);
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#isAnnounceMessages()}. Returns
+     * whether new messages are announced to assistive technologies.
+     *
+     * @return {@code true} if new messages are announced to assistive
+     *         technologies.
+     */
+    public boolean isAnnounceMessages() {
+        return this.getContent().isAnnounceMessages();
+    }
 
     private void refreshMessages() {
         List<MessageListItem> messageListItems = messageCache.stream()
