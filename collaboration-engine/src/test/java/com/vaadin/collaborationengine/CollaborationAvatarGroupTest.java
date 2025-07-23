@@ -33,7 +33,6 @@ import org.junit.Test;
 import com.vaadin.collaborationengine.util.MockService;
 import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.ReflectionUtils;
-import com.vaadin.collaborationengine.util.TestDownloadHandler;
 import com.vaadin.collaborationengine.util.TestStreamResource;
 import com.vaadin.collaborationengine.util.TestUtils;
 import com.vaadin.flow.component.UI;
@@ -42,6 +41,7 @@ import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 public class CollaborationAvatarGroupTest {
 
@@ -432,7 +432,8 @@ public class CollaborationAvatarGroupTest {
     @Test
     public void imageHandler_beforeAttach_downloadHandlerIsUsed() {
         UI.setCurrent(client1.ui);
-        client1.group.setImageHandler(user -> new TestDownloadHandler());
+        client1.group.setImageHandler(user -> DownloadHandler
+                .forClassResource(getClass(), user.getImage(), user.getName()));
         client1.attach();
         client2.attach();
 
@@ -442,7 +443,7 @@ public class CollaborationAvatarGroupTest {
 
         Assert.assertThat(item.getImage(),
                 CoreMatchers.startsWith("VAADIN/dynamic"));
-        assertEquals("", item.getImageResource().getName());
+        assertEquals("name2", item.getImageResource().getName());
     }
 
     @Test
@@ -451,7 +452,8 @@ public class CollaborationAvatarGroupTest {
         client1.attach();
         client2.attach();
 
-        client1.group.setImageHandler(user -> new TestDownloadHandler());
+        client1.group.setImageHandler(user -> DownloadHandler
+                .forClassResource(getClass(), user.getImage(), user.getName()));
 
         List<AvatarGroupItem> items = client1.getItems();
         assertEquals(2, items.size());
@@ -459,7 +461,7 @@ public class CollaborationAvatarGroupTest {
 
         Assert.assertThat(item.getImage(),
                 CoreMatchers.startsWith("VAADIN/dynamic"));
-        assertEquals("", item.getImageResource().getName());
+        assertEquals("name2", item.getImageResource().getName());
     }
 
     @Test
@@ -481,7 +483,8 @@ public class CollaborationAvatarGroupTest {
     @Test
     public void imageHandler_clearHandler_imageIsSetFromUserInfo() {
         UI.setCurrent(client1.ui);
-        client1.group.setImageHandler(user -> new TestDownloadHandler());
+        client1.group.setImageHandler(user -> DownloadHandler
+                .forClassResource(getClass(), user.getImage(), user.getName()));
         client1.attach();
         client2.attach();
 
