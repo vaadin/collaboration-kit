@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageHandler;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageProvider;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasSize;
@@ -69,6 +70,8 @@ public class CollaborationMessageList extends Composite<MessageList>
     private final SerializableSupplier<CollaborationEngine> ceSupplier;
 
     private ImageProvider imageProvider;
+
+    private ImageHandler imageHandler;
 
     private final UserInfo localUser;
 
@@ -278,7 +281,9 @@ public class CollaborationMessageList extends Composite<MessageList>
      * @param imageProvider
      *            the image provider to use, or <code>null</code> to use image
      *            URLs directly from the user info object
+     * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
      */
+    @Deprecated(since = "6.5", forRemoval = true)
     public void setImageProvider(ImageProvider imageProvider) {
         this.imageProvider = imageProvider;
         refreshMessages();
@@ -291,9 +296,61 @@ public class CollaborationMessageList extends Composite<MessageList>
      *
      * @return the current image provider callback, or <code>null</code> if no
      *         callback is set
+     * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
      */
+    @Deprecated(since = "6.5", forRemoval = true)
     public ImageProvider getImageProvider() {
         return imageProvider;
+    }
+
+    /**
+     * Sets an image handler callback for dynamically loading avatar images for
+     * a given user. The image can be loaded on-demand from a database or using
+     * any other source of IO streams.
+     * <p>
+     * If no image handler is defined, then the image URL defined by
+     * {@link UserInfo#getImage()} is directly passed to the browser. This means
+     * that avatar images need to be available as static files or served
+     * dynamically from a custom servlet. This is the default.
+     *
+     * Usage example:
+     *
+     * <pre>
+     * collaborationMessageList.setImageHandler(userInfo -> {
+     *     DownloadHandler downloadHandler = DownloadHandler
+     *             .fromInputStream(context -> {
+     *                 User userEntity = userRepository
+     *                         .findById(userInfo.getId());
+     *                 byte[] profilePicture = userEntity.getProfilePicture();
+     *                 return new DownloadResponse(
+     *                         new ByteArrayInputStream(profilePicture),
+     *                         "avatar_" + userInfo.getId(), "image/png", -1);
+     *             });
+     *     return downloadHandler;
+     * });
+     * </pre>
+     *
+     * @param imageHandler
+     *            the image handler to use, or <code>null</code> to use image
+     *            URLs directly from the user info object
+     * @since 6.5
+     */
+    public void setImageHandler(ImageHandler imageHandler) {
+        this.imageHandler = imageHandler;
+        refreshMessages();
+    }
+
+    /**
+     * Gets the currently used image handler callback.
+     *
+     * @see #setImageHandler(ImageHandler)
+     *
+     * @return the current image handler callback, or <code>null</code> if no
+     *         callback is set
+     * @since 6.5
+     */
+    public ImageHandler getImageHandler() {
+        return imageHandler;
     }
 
     /**
@@ -390,11 +447,14 @@ public class CollaborationMessageList extends Composite<MessageList>
         MessageListItem messageListItem = new MessageListItem(message.getText(),
                 message.getTime(), message.getUser().getName());
 
-        if (imageProvider == null) {
-            messageListItem.setUserImage(message.getUser().getImage());
-        } else {
+        if (imageHandler != null) {
+            messageListItem.setUserImageHandler(
+                    imageHandler.getDownloadHandler(message.getUser()));
+        } else if (imageProvider != null) {
             messageListItem.setUserImageResource(
                     imageProvider.getImageResource(message.getUser()));
+        } else {
+            messageListItem.setUserImage(message.getUser().getImage());
         }
         messageListItem
                 .setUserAbbreviation(message.getUser().getAbbreviation());

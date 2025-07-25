@@ -44,6 +44,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 public class CollaborationMessageListTest {
 
@@ -514,6 +515,94 @@ public class CollaborationMessageListTest {
         client2.sendMessage("foo");
 
         client1.messageList.setImageProvider(null);
+
+        List<MessageListItem> items = client1.getMessages();
+        Assert.assertEquals(1, items.size());
+        MessageListItem item = items.get(0);
+
+        Assert.assertNull(item.getUserImageResource());
+        Assert.assertEquals("image2", item.getUserImage());
+    }
+
+    @Test
+    public void imageHandler_beforeAttach_downloadHandlerIsUsed() {
+        UI.setCurrent(client1.ui);
+        client1.messageList.setImageHandler(user -> DownloadHandler
+                .forClassResource(getClass(), user.getImage(), user.getName()));
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client2.sendMessage("foo");
+
+        List<MessageListItem> items = client1.getMessages();
+
+        Assert.assertEquals(1, items.size());
+        MessageListItem item = items.get(0);
+
+        Assert.assertThat(item.getUserImage(),
+                CoreMatchers.startsWith("VAADIN/dynamic"));
+        Assert.assertEquals("name2", item.getUserImageResource().getName());
+    }
+
+    @Test
+    public void imageHandler_afterAttach_downloadHandlerIsUsed() {
+        UI.setCurrent(client1.ui);
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client1.messageList.setImageHandler(user -> DownloadHandler
+                .forClassResource(getClass(), user.getImage(), user.getName()));
+
+        client2.sendMessage("foo");
+
+        List<MessageListItem> items = client1.getMessages();
+
+        Assert.assertEquals(1, items.size());
+        MessageListItem item = items.get(0);
+
+        Assert.assertThat(item.getUserImage(),
+                CoreMatchers.startsWith("VAADIN/dynamic"));
+        Assert.assertEquals("name2", item.getUserImageResource().getName());
+    }
+
+    @Test
+    public void imageHandler_nullDownloadHandler_noImage() {
+        UI.setCurrent(client1.ui);
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client1.messageList.setImageHandler(user -> null);
+
+        client2.sendMessage("foo");
+
+        List<MessageListItem> items = client1.getMessages();
+        Assert.assertEquals(1, items.size());
+
+        MessageListItem item = items.get(0);
+
+        Assert.assertNull(item.getUserImage());
+        Assert.assertNull(item.getUserImageResource());
+    }
+
+    @Test
+    public void imageHandler_clearHandler_imageIsSetFromUserInfo() {
+        UI.setCurrent(client1.ui);
+        client1.messageList.setImageHandler(user -> DownloadHandler
+                .forClassResource(getClass(), user.getImage(), user.getName()));
+        client1.setTopic(TOPIC_ID);
+        client2.setTopic(TOPIC_ID);
+        client1.attach();
+        client2.attach();
+
+        client2.sendMessage("foo");
+
+        client1.messageList.setImageHandler(null);
 
         List<MessageListItem> items = client1.getMessages();
         Assert.assertEquals(1, items.size());
