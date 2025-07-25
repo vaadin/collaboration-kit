@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageHandler;
-import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageProvider;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -68,8 +67,6 @@ public class CollaborationMessageList extends Composite<MessageList>
     }
 
     private final SerializableSupplier<CollaborationEngine> ceSupplier;
-
-    private ImageProvider imageProvider;
 
     private ImageHandler imageHandler;
 
@@ -252,58 +249,6 @@ public class CollaborationMessageList extends Composite<MessageList>
     }
 
     /**
-     * Sets an image provider callback for dynamically loading avatar images for
-     * a given user. The image can be loaded on-demand from a database or using
-     * any other source of IO streams.
-     * <p>
-     * If no image callback is defined, then the image URL defined by
-     * {@link UserInfo#getImage()} is directly passed to the browser. This means
-     * that avatar images need to be available as static files or served
-     * dynamically from a custom servlet. This is the default.
-     * <p>
-     *
-     * Usage example:
-     *
-     * <pre>
-     * collaborationMessageList.setImageProvider(userInfo -> {
-     *     StreamResource streamResource = new StreamResource(
-     *             "avatar_" + userInfo.getId(), () -> {
-     *                 User userEntity = userRepository
-     *                         .findById(userInfo.getId());
-     *                 byte[] profilePicture = userEntity.getProfilePicture();
-     *                 return new ByteArrayInputStream(profilePicture);
-     *             });
-     *     streamResource.setContentType("image/png");
-     *     return streamResource;
-     * });
-     * </pre>
-     *
-     * @param imageProvider
-     *            the image provider to use, or <code>null</code> to use image
-     *            URLs directly from the user info object
-     * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
-     */
-    @Deprecated(since = "6.5", forRemoval = true)
-    public void setImageProvider(ImageProvider imageProvider) {
-        this.imageProvider = imageProvider;
-        refreshMessages();
-    }
-
-    /**
-     * Gets the currently used image provider callback.
-     *
-     * @see #setImageProvider(ImageProvider)
-     *
-     * @return the current image provider callback, or <code>null</code> if no
-     *         callback is set
-     * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
-     */
-    @Deprecated(since = "6.5", forRemoval = true)
-    public ImageProvider getImageProvider() {
-        return imageProvider;
-    }
-
-    /**
      * Sets an image handler callback for dynamically loading avatar images for
      * a given user. The image can be loaded on-demand from a database or using
      * any other source of IO streams.
@@ -450,9 +395,6 @@ public class CollaborationMessageList extends Composite<MessageList>
         if (imageHandler != null) {
             messageListItem.setUserImageHandler(
                     imageHandler.getDownloadHandler(message.getUser()));
-        } else if (imageProvider != null) {
-            messageListItem.setUserImageResource(
-                    imageProvider.getImageResource(message.getUser()));
         } else {
             messageListItem.setUserImage(message.getUser().getImage());
         }
