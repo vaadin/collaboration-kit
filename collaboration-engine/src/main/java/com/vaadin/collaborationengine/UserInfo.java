@@ -20,7 +20,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageProvider;
+import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageHandler;
 
 /**
  * User information of a collaborating user, used with various features of the
@@ -73,7 +73,7 @@ public class UserInfo implements Serializable {
      * If this user info is given to a {@link CollaborationAvatarGroup}, the
      * image URL is used to load the user's avatar. Alternatively, the user
      * images can be loaded from a backend to the avatar group with
-     * {@link CollaborationAvatarGroup#setImageProvider(ImageProvider)}.
+     * {@link CollaborationAvatarGroup#setImageHandler(ImageHandler)}.
      *
      *
      * @param userId
@@ -177,7 +177,7 @@ public class UserInfo implements Serializable {
      * If this user info is given to a {@link CollaborationAvatarGroup}, the
      * image URL is used to load the user's avatar. Alternatively, the user
      * images can be loaded from a backend to the avatar group with
-     * {@link CollaborationAvatarGroup#setImageProvider(ImageProvider)}.
+     * {@link CollaborationAvatarGroup#setImageHandler(ImageHandler)}.
      *
      * @param imageUrl
      *            the image URL to set
