@@ -380,12 +380,12 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup>
      * collaborationAvatarGroup.setImageHandler(userInfo -> {
      *     DownloadHandler downloadHandler = DownloadHandler
      *             .fromInputStream(context -> {
-     *                 context.setFileName("avatar_" + userInfo.getId());
-     *                 context.setContentType("image/png");
      *                 User userEntity = userRepository
      *                         .findById(userInfo.getId());
      *                 byte[] profilePicture = userEntity.getProfilePicture();
-     *                 return new ByteArrayInputStream(profilePicture);
+     *                 return new DownloadResponse(
+     *                         new ByteArrayInputStream(profilePicture),
+     *                         "avatar_" + userInfo.getId(), "image/png", -1);
      *             });
      *     return downloadHandler;
      * });
