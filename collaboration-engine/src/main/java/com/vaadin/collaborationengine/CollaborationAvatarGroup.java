@@ -30,7 +30,6 @@ import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupI18n;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.avatar.AvatarGroupVariant;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.server.AbstractStreamResource;
@@ -46,7 +45,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  * @since 1.0
  */
 public class CollaborationAvatarGroup extends Composite<AvatarGroup>
-        implements HasSize, HasStyle, HasTheme, HasOverlayClassName {
+        implements HasSize, HasStyle, HasTheme {
 
     /**
      * Callback for creating a stream resource with the image for a specific

@@ -10,7 +10,7 @@
     <parent>
         <artifactId>collaboration-engine-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>6.5-SNAPSHOT</version>
+        <version>7.0-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -19,9 +19,9 @@
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <!-- test dependencies versions -->
         <servlet-api.version>6.0.0</servlet-api.version>
-        <spring-boot.version>3.5.3</spring-boot.version>
-        <flow.cdi.version>15.0-SNAPSHOT</flow.cdi.version>
-        <testbench.version>9.4.1</testbench.version>
+        <spring-boot.version>4.0.0-M1</spring-boot.version>
+        <flow.cdi.version>16.0-SNAPSHOT</flow.cdi.version>
+        <testbench.version>10.0.0-alpha3</testbench.version>
         <!-- selenium is so much verbose -->
         <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     </properties>
