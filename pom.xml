@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>collaboration-engine-parent</artifactId>
-    <version>6.5-SNAPSHOT</version>
+    <version>7.0-SNAPSHOT</version>
     <name>Collaboration Engine Parent</name>
     <packaging>pom</packaging>
 
@@ -36,8 +36,8 @@
 
         <!-- Versions to keep in sync with the targeted platform version: -->
         <!-- spring,cdi versions has been moved to test module. -->
-        <flow.version>24.8-SNAPSHOT</flow.version>
-        <vaadin.component.version>24.8-SNAPSHOT</vaadin.component.version>
+        <flow.version>25.0-SNAPSHOT</flow.version>
+        <vaadin.component.version>25.0-SNAPSHOT</vaadin.component.version>
         <vaadin.lumo.version>${vaadin.component.version}</vaadin.lumo.version>
 
         <!-- Keep in sync with flow-server: -->
