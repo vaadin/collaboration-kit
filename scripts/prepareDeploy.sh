@@ -54,17 +54,17 @@ token=$2
 versionBase=`getBaseVersion $version`
 pomBase=`getBaseVersion $pomVersion`
 
-### Get the master branch version for CE
-masterPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-engine-internal/master/pom.xml"`
+### Get the main branch version for CE
+masterPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-kit/main/pom.xml"`
 masterMajorMinor=`echo "$masterPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
 
 ### Load versions file for this platform release
 branch=$versionBase
 if [ $branch = $masterMajorMinor ]
 then
-  branch=master
+  branch=main
 else
-  customPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-engine-internal/$versionBase/pom.xml"`
+  customPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-kit/$versionBase/pom.xml"`
   customMajorMinor=`echo "$customPom" | grep '<vaadin.component.version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
   branch=`getBaseVersion $customMajorMinor`
 fi
@@ -72,10 +72,10 @@ fi
 echo $branch
 
 versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
-[ $? != 0 ] && branch=master && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
+[ $? != 0 ] && branch=main && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
 ### Check that current branch is valid for the version to release
-[ $branch != master -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
+[ $branch != main -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
 
 ### Compute flow version
 flow=`getPlatformVersion flow`
