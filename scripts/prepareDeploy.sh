@@ -81,10 +81,6 @@ versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/ver
 flow=`getPlatformVersion flow`
 flow=`getLatest flow $flow`
 
-### Compute spring version
-spring=`getPlatformVersion flow-spring`
-spring=`getLatest vaadin-spring $spring`
-
 ### Compute cdi version
 cdi=`getPlatformVersion flow-cdi`
 cdi=`getLatest vaadin-cdi $cdi`
@@ -98,7 +94,6 @@ echo "Setting version=$version to collaboration-engine-internal"
 mvn -B -q versions:set -DnewVersion=$version -DgenerateBackupPoms=false|| exit 1
 
 setPomVersion flow $flow
-setPomVersion vaadin.spring $spring
 setPomVersion flow.cdi $cdi
 setPomVersion vaadin.component $component || exit 1
 
@@ -107,6 +102,5 @@ setPomVersion vaadin.component $component || exit 1
 echo "##teamcity[setParameter name='ce.branch' value='$branch']"
 echo "##teamcity[setParameter name='maven.profile' value='$profile']"
 echo "##teamcity[setParameter name='flow.version' value='$flow']"
-echo "##teamcity[setParameter name='vaadin.spring.version' value='$spring']"
 echo "##teamcity[setParameter name='vaadin.cdi.version' value='$cdi']"
 echo "##teamcity[setParameter name='component.version' value='$component']"
