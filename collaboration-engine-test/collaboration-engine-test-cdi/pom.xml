@@ -10,7 +10,7 @@
     <parent>
         <artifactId>collaboration-engine-test</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>6.5-SNAPSHOT</version>
+        <version>6.6-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>collaboration-engine-test-common</artifactId>
-            <version>6.5-SNAPSHOT</version>
+            <version>6.6-SNAPSHOT</version>
         </dependency>
 
         <dependency>
