@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>collaboration-engine-parent</artifactId>
-    <version>6.4-SNAPSHOT</version>
+    <version>7.0-SNAPSHOT</version>
     <name>Collaboration Engine Parent</name>
     <packaging>pom</packaging>
 
@@ -36,14 +36,14 @@
 
         <!-- Versions to keep in sync with the targeted platform version: -->
         <!-- spring,cdi versions has been moved to test module. -->
-        <flow.version>24.6-SNAPSHOT</flow.version>
-        <vaadin.component.version>24.6-SNAPSHOT</vaadin.component.version>
+        <flow.version>25.0-SNAPSHOT</flow.version>
+        <vaadin.component.version>25.0-SNAPSHOT</vaadin.component.version>
         <vaadin.lumo.version>${vaadin.component.version}</vaadin.lumo.version>
 
         <!-- Keep in sync with flow-server: -->
-        <jackson.version>2.17.1</jackson.version>
+        <jackson.version>2.19.1</jackson.version>
         <junit.version>4.13.2</junit.version>
-        <jetty.version>11.0.20</jetty.version>
+        <jetty.version>11.0.25</jetty.version>
 
         <!-- plugin versions -->
         <spotless.plugin.version>2.43.0</spotless.plugin.version>
@@ -67,7 +67,7 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>license-checker</artifactId>
-                <version>1.13.3</version>
+                <version>2.0.0-beta1</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
