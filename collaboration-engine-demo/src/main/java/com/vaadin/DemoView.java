@@ -38,6 +38,7 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.shared.communication.PushMode;
 
 @Route("")
+@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 @CssImport("./styles/shared-styles.css")
 public class DemoView extends VerticalLayout {
 
