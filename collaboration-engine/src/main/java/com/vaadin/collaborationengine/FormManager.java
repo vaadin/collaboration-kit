@@ -428,7 +428,8 @@ public class FormManager extends AbstractCollaborationManager
         }
     }
 
-    private void applyPropertyChangeHandler(String propertyName, MapChangeEvent mapChangeEvent) {
+    private void applyPropertyChangeHandler(String propertyName,
+            MapChangeEvent mapChangeEvent) {
         if (propertyChangeHandler != null) {
             PropertyChangeHandler.PropertyChangeEvent event = new DefaultPropertyChangeEvent(
                     propertyName, mapChangeEvent);
@@ -480,7 +481,8 @@ public class FormManager extends AbstractCollaborationManager
         private final String propertyName;
         private final MapChangeEvent event;
 
-        public DefaultPropertyChangeEvent(String propertyName, MapChangeEvent event) {
+        public DefaultPropertyChangeEvent(String propertyName,
+                MapChangeEvent event) {
             this.propertyName = propertyName;
             this.event = event;
         }

@@ -52,8 +52,8 @@ public interface PropertyChangeHandler extends Serializable {
          * @param type
          *            the expected type of the returned instance
          * @param <T>
-         *            the type of the value from <code>type</code> parameter, e.g.
-         *            <code>String</code>
+         *            the type of the value from <code>type</code> parameter,
+         *            e.g. <code>String</code>
          * @return throws an {@link UnsupportedOperationException}
          */
         default <T> T getValue(Class<T> type) {
@@ -67,8 +67,8 @@ public interface PropertyChangeHandler extends Serializable {
          * @param typeRef
          *            the expected type reference of the returned instance
          * @param <T>
-         *            the type reference of the value from <code>typeRef</code> parameter, e.g.
-         *            <code>List<String>></code>
+         *            the type reference of the value from <code>typeRef</code>
+         *            parameter, e.g. <code>List<String>></code>
          * @return throws an {@link UnsupportedOperationException}
          */
         default <T> T getValue(TypeReference<T> typeRef) {
