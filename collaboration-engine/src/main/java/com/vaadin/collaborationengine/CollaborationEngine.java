@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.collaborationengine.Backend.EventLog;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.UsageStatistics;
@@ -424,81 +422,6 @@ public class CollaborationEngine {
 
         Topic topic = new Topic(id, () -> this, eventLog);
         return new TopicAndEventLog(topic, eventLog);
-    }
-
-    /**
-     * Requests access for a user to Collaboration Engine. The provided callback
-     * will be invoked with a response that tells whether the access is granted.
-     * <p>
-     * This method is deprecated and the provided callback always receives a
-     * response that resolves to {@code true}. This means it is not more
-     * necessary to use this method since access is now always granted.
-     * <p>
-     * The current {@link UI} is accessed to run the callback, which means that
-     * UI updates in the callback are pushed to the client in real-time. Because
-     * of depending on the current UI, the method can be called only in the
-     * request processing thread, or it will throw.
-     *
-     * @param user
-     *            the user requesting access
-     * @param requestCallback
-     *            the callback to accept the response
-     *
-     * @since 3.0
-     * @deprecated this method is deprecated and now the callback always
-     *             receives a response that resolves to {@code true}
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public void requestAccess(UserInfo user,
-            Consumer<AccessResponse> requestCallback) {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("You are calling the requestAccess "
-                    + "method without a UI instance being available. You can "
-                    + "either move the call where you are sure a UI is defined "
-                    + "or directly provide a ConnectionContext to the method. "
-                    + "The current UI is automatically defined when processing "
-                    + "requests to the server. In other cases, (e.g. from "
-                    + "background threads), the current UI is not automatically "
-                    + "defined.");
-        }
-        ComponentConnectionContext context = new ComponentConnectionContext(ui);
-        requestAccess(context, user, requestCallback);
-    }
-
-    /**
-     * Requests access for a user to Collaboration Engine. The provided callback
-     * will be invoked with a response that tells whether the access is granted.
-     * <p>
-     * This method is deprecated and the provided callback always receives a
-     * response that resolves to {@code true}. This means it is not more
-     * necessary to use this method since access is now always granted.
-     *
-     * @param context
-     *            context for the connection
-     * @param user
-     *            the user requesting access
-     * @param requestCallback
-     *            the callback to accept the response
-     *
-     * @since 3.0
-     * @deprecated this method is deprecated and now the callback always
-     *             receives a response that resolves to {@code true}
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public void requestAccess(ConnectionContext context, UserInfo user,
-            Consumer<AccessResponse> requestCallback) {
-        Objects.requireNonNull(context, "ConnectionContext cannot be null");
-        Objects.requireNonNull(user, "UserInfo cannot be null");
-        Objects.requireNonNull(requestCallback,
-                "AccessResponse cannot be null");
-
-        // Will handle remote connection here
-        context.init(new SingleUseActivationHandler(actionDispatcher -> {
-            AccessResponse response = new AccessResponse(true);
-            actionDispatcher
-                    .dispatchAction(() -> requestCallback.accept(response));
-        }), command -> getExecutorService().execute(command));
     }
 
     /**

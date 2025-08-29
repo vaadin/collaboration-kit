@@ -106,23 +106,6 @@ public class SystemConnectionContext implements ConnectionContext {
      * {@link CollaborationEngine#getSystemContext()} rather than creating new
      * instances.
      *
-     * @param ce
-     *            the collaboration engine instance to use, not
-     *            <code>null</code>
-     * @deprecated This constructor is not compatible with serialization
-     */
-    @Deprecated(since = "6.2", forRemoval = true)
-    public SystemConnectionContext(CollaborationEngine ce) {
-        this(() -> ce);
-    }
-
-    /**
-     * Creates a new system connection context instance for the given
-     * Collaboration Engine instance. It is typically recommended reusing an
-     * existing instance through {@link #getInstance()} or
-     * {@link CollaborationEngine#getSystemContext()} rather than creating new
-     * instances.
-     *
      * @param ceSupplier
      *            the collaboration engine instance to use, not
      *            <code>null</code>
