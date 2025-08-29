@@ -74,23 +74,6 @@ public abstract class AbstractCollaborationManager implements Serializable {
      *            the local user, not {@code null}
      * @param topicId
      *            the topic id, not {@code null}
-     * @param collaborationEngine
-     *            the Collaboration Engine instance, not {@code null}
-     * @deprecated This constructor is not compatible with serialization
-     */
-    @Deprecated(since = "6.1", forRemoval = true)
-    protected AbstractCollaborationManager(UserInfo localUser, String topicId,
-            CollaborationEngine collaborationEngine) {
-        this(localUser, topicId, () -> collaborationEngine);
-    }
-
-    /**
-     * Constructs a new manager instance.
-     *
-     * @param localUser
-     *            the local user, not {@code null}
-     * @param topicId
-     *            the topic id, not {@code null}
      * @param ceSupplier
      *            the Collaboration Engine instance, not {@code null}
      */

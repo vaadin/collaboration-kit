@@ -473,40 +473,6 @@ public class CollaborationBinder<BEAN> extends Binder<BEAN>
     }
 
     /**
-     * Not supported by the collaboration binder! It requires a property name
-     * for binding, so the other overload
-     * {@link CollaborationBinder#bind(HasValue, String)} should be used
-     * instead.
-     * <p>
-     * See {@link Binder#bind(HasValue, ValueProvider, Setter)} to learn how to
-     * use the method with the regular (non-collaboration) binder.
-     *
-     * @param <FIELDVALUE>
-     *            the value type of the field
-     * @param field
-     *            the field to bind, not <code>null</code>
-     * @param getter
-     *            the function to get the value of the property to the field,
-     *            not <code>null</code>
-     * @param setter
-     *            the function to write the field value to the property or
-     *            <code>null</code> if read-only
-     * @return the newly created binding
-     * @throws UnsupportedOperationException
-     *             as the method is not supported by the collaboration binder
-     * @deprecated The method does not work with the collaboration binder. Use
-     *             {@link CollaborationBinder#bind(HasValue, String)} instead.
-     */
-    @Override
-    @Deprecated
-    public <FIELDVALUE> Binding<BEAN, FIELDVALUE> bind(
-            HasValue<?, FIELDVALUE> field,
-            ValueProvider<BEAN, FIELDVALUE> getter,
-            Setter<BEAN, FIELDVALUE> setter) {
-        return super.bind(field, getter, setter);
-    }
-
-    /**
      * Binds the given field to the property with the given name, as described
      * in {@link Binder#bind(HasValue, String)}.
      * <p>
@@ -556,7 +522,7 @@ public class CollaborationBinder<BEAN> extends Binder<BEAN>
      *             bean using {@link #writeBean}.
      */
     @Override
-    @Deprecated
+    @Deprecated(forRemoval = false)
     public void setBean(BEAN bean) {
         throw new UnsupportedOperationException(
                 "This operation is not supported by the collaboration binder. "
@@ -573,7 +539,7 @@ public class CollaborationBinder<BEAN> extends Binder<BEAN>
      *             values back to the bean using {@link #writeBean}.
      */
     @Override
-    @Deprecated
+    @Deprecated(forRemoval = false)
     public BEAN getBean() {
         return super.getBean();
     }
@@ -587,7 +553,7 @@ public class CollaborationBinder<BEAN> extends Binder<BEAN>
      *             {@link #reset}.
      */
     @Override
-    @Deprecated
+    @Deprecated(forRemoval = false)
     public void readBean(BEAN bean) {
         throw new UnsupportedOperationException(
                 "This operation is not supported by the collaboration binder. "

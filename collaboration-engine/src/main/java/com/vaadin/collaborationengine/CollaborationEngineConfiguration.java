@@ -50,9 +50,7 @@ public class CollaborationEngineConfiguration {
 
     static final int DEFAULT_EVENT_LOG_SUBSCRIBE_RETRY_ATTEMPTS = 40;
 
-    private LicenseEventHandler licenseEventHandler;
     private VaadinService vaadinService;
-    private String configuredDataDir;
     private String configuredBeaconPath = DEFAULT_BEACON_PATH;
     private boolean automaticallyActivatePush = DEFAULT_AUTOMATICALLY_ACTIVATE_PUSH;
 
@@ -60,81 +58,12 @@ public class CollaborationEngineConfiguration {
 
     private ExecutorService executorService;
 
-    private LicenseStorage licenseStorage;
-
-    /**
-     * Creates a new Collaboration Engine configuration with the provided
-     * handler for license events.
-     * <p>
-     * This constructor is deprecated and the provided handler won't receive any
-     * events.
-     *
-     * @param licenseEventHandler
-     *            the license event handler, not {@code null}
-     *
-     * @since 3.0
-     * @deprecated the provided handler won't receive any events, please prefer
-     *             using the default constructor with no parameters
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public CollaborationEngineConfiguration(
-            LicenseEventHandler licenseEventHandler) {
-        this.licenseEventHandler = Objects.requireNonNull(licenseEventHandler,
-                "The license event handler cannot be null");
-    }
-
     /**
      * Creates a new Collaboration Engine configuration.
      */
     public CollaborationEngineConfiguration() {
         // This default constructor does nothing, it is explicitly declared
         // until the deprecated constructor above is removed
-    }
-
-    /**
-     * Gets the license event handler of this configuration.
-     *
-     * @return the license event handler
-     *
-     * @since 3.0
-     * @deprecated the handler is not used since 6.3
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public LicenseEventHandler getLicenseEventHandler() {
-        return licenseEventHandler;
-    }
-
-    /**
-     * Gets the configured data-directory.
-     *
-     * @return the data-directory
-     *
-     * @since 3.0
-     * @deprecated the data-directory is not used since 6.3
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public String getDataDir() {
-        return configuredDataDir;
-    }
-
-    /**
-     * Sets the path to the data-directory, which is used by Collaboration
-     * Engine to store files.
-     * <p>
-     * The data-directory can also be configured by setting the
-     * {@code vaadin.ce.dataDir} system property either in the command line or
-     * with {@link System#setProperty(String, String)}. If a system property is
-     * set, it will take precedence over this setting.
-     *
-     * @param dataDir
-     *            path to the data-directory
-     *
-     * @since 3.0
-     * @deprecated the data-directory is not used since 6.3
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public void setDataDir(String dataDir) {
-        configuredDataDir = dataDir;
     }
 
     /**
@@ -238,31 +167,6 @@ public class CollaborationEngineConfiguration {
      */
     public Backend getBackend() {
         return backend;
-    }
-
-    /**
-     * Gets the configured license-storage implementation.
-     *
-     * @return the license-storage implementation, or <code>null</code> if not
-     *         configured
-     * @deprecated license storage is not needed since 6.3
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public LicenseStorage getLicenseStorage() {
-        return licenseStorage;
-    }
-
-    /**
-     * Sets a configured license-storage implementation.
-     *
-     * @param licenseStorage
-     *            the license-storage implementation, or <code>null</code> to
-     *            unset
-     * @deprecated license storage is not needed since 6.3
-     */
-    @Deprecated(since = "6.3", forRemoval = true)
-    public void setLicenseStorage(LicenseStorage licenseStorage) {
-        this.licenseStorage = licenseStorage;
     }
 
     /**

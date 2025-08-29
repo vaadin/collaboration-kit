@@ -123,25 +123,6 @@ public class MessageManager extends AbstractCollaborationManager {
      *            the information of the local user, not {@code null}
      * @param topicId
      *            the id of the topic to connect to, not {@code null}
-     * @param collaborationEngine
-     *            the collaboration engine instance to use, not {@code null}
-     * @deprecated This constructor is not compatible with serialization
-     */
-    @Deprecated(since = "6.1", forRemoval = true)
-    public MessageManager(ConnectionContext context, UserInfo localUser,
-            String topicId, CollaborationEngine collaborationEngine) {
-        this(context, localUser, topicId, null, () -> collaborationEngine);
-    }
-
-    /**
-     * Creates a new manager for the given connection context.
-     *
-     * @param context
-     *            the context that manages connection status, not {@code null}
-     * @param localUser
-     *            the information of the local user, not {@code null}
-     * @param topicId
-     *            the id of the topic to connect to, not {@code null}
      * @param ceSupplier
      *            the collaboration engine instance to use, not {@code null}
      */
@@ -149,28 +130,6 @@ public class MessageManager extends AbstractCollaborationManager {
             String topicId,
             SerializableSupplier<CollaborationEngine> ceSupplier) {
         this(context, localUser, topicId, null, ceSupplier);
-    }
-
-    /**
-     * Creates a new persisting manager for the given connection context.
-     *
-     * @param context
-     *            the context that manages connection status, not {@code null}
-     * @param localUser
-     *            the information of the local user, not {@code null}
-     * @param topicId
-     *            the id of the topic to connect to, not {@code null}
-     * @param persister
-     *            the persister to read/write messages to an external source
-     * @param collaborationEngine
-     *            the collaboration engine instance to use, not {@code null}
-     * @deprecated This constructor is not compatible with serialization
-     */
-    @Deprecated(since = "6.1", forRemoval = true)
-    public MessageManager(ConnectionContext context, UserInfo localUser,
-            String topicId, CollaborationMessagePersister persister,
-            CollaborationEngine collaborationEngine) {
-        this(context, localUser, topicId, persister, () -> collaborationEngine);
     }
 
     /**
