@@ -119,29 +119,6 @@ public class FormManager extends AbstractCollaborationManager
      *            the information of the local user, not {@code null}
      * @param topicId
      *            the id of the topic to connect to, not {@code null}
-     * @param collaborationEngine
-     *            the collaboration engine instance to use, not {@code null}
-     * @deprecated This constructor is not compatible with serialization
-     */
-    @Deprecated(since = "6.1", forRemoval = true)
-    public FormManager(ConnectionContext context, UserInfo localUser,
-            String topicId, CollaborationEngine collaborationEngine) {
-        this(context, localUser, topicId, () -> collaborationEngine);
-    }
-
-    /**
-     * Creates a new manager for the provided connection context.
-     * <p>
-     * The provided user information is used to set the highlight for the local
-     * user with {@link #highlight(String,boolean)} or
-     * {@link #highlight(String,boolean,int)} (the default is {@code false}).
-     *
-     * @param context
-     *            the context that manages connection status, not {@code null}
-     * @param localUser
-     *            the information of the local user, not {@code null}
-     * @param topicId
-     *            the id of the topic to connect to, not {@code null}
      * @param ceSupplier
      *            the collaboration engine instance to use, not {@code null}
      */
