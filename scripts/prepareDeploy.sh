@@ -12,10 +12,10 @@ getLatest() {
    releases=`curl -s "https://repo.maven.apache.org/maven2/com/vaadin/$1/maven-metadata.xml"`
    prereleases=`curl -s "https://maven.vaadin.com/vaadin-prereleases/com/vaadin/$1/maven-metadata.xml"`
 
-   stable=`echo "$releases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | tail -1`
+   stable=`echo "$releases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | egrep 'beta|rc' | tail -1`
    [ -n "$stable" ] && echo $stable && return
-   pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | grep -v "SNAPSHOT" | egrep 'alpha|beta|rc' | tail -1`
-   [ -z "$pre" ] && pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | egrep 'alpha|beta|rc' | tail -1`
+   pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | grep -v "SNAPSHOT" | egrep 'alpha' | tail -1`
+   [ -z "$pre" ] && pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | egrep 'alpha' | tail -1`
    [ -z "$pre" ] && pre="$2"
    expr "$pre" : ".*SNAPSHOT" >/dev/null && echo "Releases cannot depend on SNAPSHOT: $1 - $pre" && exit 1 || echo $pre
 }
@@ -45,7 +45,7 @@ setPomVersion() {
 ### Check that version is given as a parameter and has a valid format
 version=$1
 ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+([\.-](alpha|beta|rc)[0-9]+)?$ ]] && echo Invalid version format: $version && exit 1
-[[ $version =~ (alpha|beta|rc) ]] && profile=prerelease || profile=maven-central
+[[ $version =~ (alpha) ]] && profile=prerelease || profile=maven-central
 pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
 
 token=$2
@@ -54,17 +54,17 @@ token=$2
 versionBase=`getBaseVersion $version`
 pomBase=`getBaseVersion $pomVersion`
 
-### Get the master branch version for CE
-masterPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-engine-internal/master/pom.xml"`
+### Get the main branch version for CE
+masterPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-kit/main/pom.xml"`
 masterMajorMinor=`echo "$masterPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
 
 ### Load versions file for this platform release
 branch=$versionBase
 if [ $branch = $masterMajorMinor ]
 then
-  branch=master
+  branch=main
 else
-  customPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-engine-internal/$versionBase/pom.xml"`
+  customPom=`curl -s "https://$token@raw.githubusercontent.com/vaadin/collaboration-kit/$versionBase/pom.xml"`
   customMajorMinor=`echo "$customPom" | grep '<vaadin.component.version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
   branch=`getBaseVersion $customMajorMinor`
 fi
@@ -72,18 +72,14 @@ fi
 echo $branch
 
 versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
-[ $? != 0 ] && branch=master && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
+[ $? != 0 ] && branch=main && versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/versions.json"`
 
 ### Check that current branch is valid for the version to release
-[ $branch != master -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
+[ $branch != main -a "$versionBase" != "$pomBase" ] && echo "Incorrect pomVersion=$pomVersion for version=$version" && exit 1
 
 ### Compute flow version
 flow=`getPlatformVersion flow`
 flow=`getLatest flow $flow`
-
-### Compute spring version
-spring=`getPlatformVersion flow-spring`
-spring=`getLatest vaadin-spring $spring`
 
 ### Compute cdi version
 cdi=`getPlatformVersion flow-cdi`
@@ -98,7 +94,6 @@ echo "Setting version=$version to collaboration-engine-internal"
 mvn -B -q versions:set -DnewVersion=$version -DgenerateBackupPoms=false|| exit 1
 
 setPomVersion flow $flow
-setPomVersion vaadin.spring $spring
 setPomVersion flow.cdi $cdi
 setPomVersion vaadin.component $component || exit 1
 
@@ -107,6 +102,5 @@ setPomVersion vaadin.component $component || exit 1
 echo "##teamcity[setParameter name='ce.branch' value='$branch']"
 echo "##teamcity[setParameter name='maven.profile' value='$profile']"
 echo "##teamcity[setParameter name='flow.version' value='$flow']"
-echo "##teamcity[setParameter name='vaadin.spring.version' value='$spring']"
 echo "##teamcity[setParameter name='vaadin.cdi.version' value='$cdi']"
 echo "##teamcity[setParameter name='component.version' value='$component']"
