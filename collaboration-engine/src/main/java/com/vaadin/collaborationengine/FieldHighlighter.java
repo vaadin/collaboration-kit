@@ -26,14 +26,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import com.vaadin.collaborationengine.FormManager.FocusedEditor;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.fieldhighlighter.FieldHighlighterInitializer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -56,10 +54,13 @@ class FieldHighlighter extends FieldHighlighterInitializer
                     element.addEventListener("vaadin-highlight-show", e -> {
 
                         JsonNode eventData = e.getEventData();
-                        JsonNode eventDetail = eventData != null ? eventData.at("/event/detail") : null;
-                        int fieldIndex = (eventDetail != null && eventDetail.has("fieldIndex"))
-                                ? eventDetail.get("fieldIndex").asInt()
-                                : 0;
+                        JsonNode eventDetail = eventData != null
+                                ? eventData.at("/event/detail")
+                                : null;
+                        int fieldIndex = (eventDetail != null
+                                && eventDetail.has("fieldIndex"))
+                                        ? eventDetail.get("fieldIndex").asInt()
+                                        : 0;
 
                         binder.addEditor(propertyName, fieldIndex);
 
@@ -121,8 +122,10 @@ class FieldHighlighter extends FieldHighlighterInitializer
     private ObjectNode serialize(FocusedEditor focusedEditor) {
         var editorJson = JsonNodeFactory.instance.objectNode();
         editorJson.put("id", focusedEditor.user.getId());
-        editorJson.put("name", Objects.toString(focusedEditor.user.getName(), ""));
-        editorJson.put("colorIndex", colorIndexProvider.apply(focusedEditor.user));
+        editorJson.put("name",
+                Objects.toString(focusedEditor.user.getName(), ""));
+        editorJson.put("colorIndex",
+                colorIndexProvider.apply(focusedEditor.user));
         editorJson.put("fieldIndex", focusedEditor.fieldIndex);
         return editorJson;
     }

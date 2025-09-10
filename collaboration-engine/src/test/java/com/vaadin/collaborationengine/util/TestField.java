@@ -18,9 +18,9 @@ package com.vaadin.collaborationengine.util;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.junit.Assert;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.Focusable;
