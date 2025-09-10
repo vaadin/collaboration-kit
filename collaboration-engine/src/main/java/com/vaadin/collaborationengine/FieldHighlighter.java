@@ -32,6 +32,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.fieldhighlighter.FieldHighlighterInitializer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -46,8 +47,8 @@ class FieldHighlighter extends FieldHighlighterInitializer
 
         List<Registration> registrations = new ArrayList<>();
 
-        if (field instanceof HasElement) {
-            Element element = ((HasElement) field).getElement();
+        if (field instanceof HasElement hasElement) {
+            Element element = hasElement.getElement();
             registrations.add(init(element));
 
             registrations.add(
@@ -85,7 +86,8 @@ class FieldHighlighter extends FieldHighlighterInitializer
             UserInfo localUser) {
         if (field instanceof HasElement hasElement) {
             hasElement.getElement().executeJs(
-                    "customElements.get('vaadin-field-highlighter').setUsers(this, $0)",
+                    "customElements.get('vaadin-field-highlighter')"
+                            + ".setUsers(this, $0)",
                     serialize(editors.stream()
                             .filter(editor -> !editor.user.equals(localUser))));
         }
@@ -114,9 +116,7 @@ class FieldHighlighter extends FieldHighlighterInitializer
     }
 
     private ArrayNode serialize(Stream<FocusedEditor> editors) {
-        var array = JsonNodeFactory.instance.arrayNode();
-        editors.map(this::serialize).forEach(array::add);
-        return array;
+        return editors.map(this::serialize).collect(JacksonUtils.asArray());
     }
 
     private ObjectNode serialize(FocusedEditor focusedEditor) {
