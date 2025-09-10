@@ -18,6 +18,7 @@ package com.vaadin.collaborationengine.util;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.junit.Assert;
 
 import com.vaadin.flow.component.AbstractField;
@@ -27,8 +28,6 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-
-import elemental.json.Json;
 
 @Tag("test-field")
 public class TestField extends AbstractField<TestField, String>
@@ -62,7 +61,7 @@ public class TestField extends AbstractField<TestField, String>
 
     private void fireEvent(String eventName) {
         DomEvent event = new DomEvent(getElement(), eventName,
-                Json.createObject());
+                JsonNodeFactory.instance.objectNode());
         getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(event);
     }
