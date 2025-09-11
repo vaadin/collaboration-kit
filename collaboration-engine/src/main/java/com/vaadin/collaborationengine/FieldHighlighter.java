@@ -56,7 +56,7 @@ class FieldHighlighter extends FieldHighlighterInitializer
 
                         JsonNode eventData = e.getEventData();
                         JsonNode eventDetail = eventData != null
-                                ? eventData.at("/event/detail")
+                                ? eventData.at("/event.detail")
                                 : null;
                         int fieldIndex = (eventDetail != null
                                 && eventDetail.has("fieldIndex"))
