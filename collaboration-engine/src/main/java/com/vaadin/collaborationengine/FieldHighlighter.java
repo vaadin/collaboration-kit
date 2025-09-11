@@ -22,18 +22,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.collaborationengine.FormManager.FocusedEditor;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.fieldhighlighter.FieldHighlighterInitializer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 /**
  * @author Vaadin Ltd
@@ -47,18 +47,21 @@ class FieldHighlighter extends FieldHighlighterInitializer
 
         List<Registration> registrations = new ArrayList<>();
 
-        if (field instanceof HasElement) {
-            Element element = ((HasElement) field).getElement();
+        if (field instanceof HasElement hasElement) {
+            Element element = hasElement.getElement();
             registrations.add(init(element));
 
             registrations.add(
                     element.addEventListener("vaadin-highlight-show", e -> {
 
-                        JsonObject eventDetail = e.getEventData()
-                                .getObject("event.detail");
-                        int fieldIndex = eventDetail != null
-                                ? (int) eventDetail.getNumber("fieldIndex")
-                                : 0;
+                        JsonNode eventData = e.getEventData();
+                        JsonNode eventDetail = eventData != null
+                                ? eventData.at("/event.detail")
+                                : null;
+                        int fieldIndex = (eventDetail != null
+                                && eventDetail.has("fieldIndex"))
+                                        ? eventDetail.get("fieldIndex").asInt()
+                                        : 0;
 
                         binder.addEditor(propertyName, fieldIndex);
 
@@ -81,9 +84,10 @@ class FieldHighlighter extends FieldHighlighterInitializer
 
     void setEditors(HasValue<?, ?> field, List<FocusedEditor> editors,
             UserInfo localUser) {
-        if (field instanceof HasElement) {
-            ((HasElement) field).getElement().executeJs(
-                    "customElements.get('vaadin-field-highlighter').setUsers(this, $0)",
+        if (field instanceof HasElement hasElement) {
+            hasElement.getElement().executeJs(
+                    "customElements.get('vaadin-field-highlighter')"
+                            + ".setUsers(this, $0)",
                     serialize(editors.stream()
                             .filter(editor -> !editor.user.equals(localUser))));
         }
@@ -94,8 +98,8 @@ class FieldHighlighter extends FieldHighlighterInitializer
     }
 
     void addEditor(HasValue<?, ?> field, UserInfo user, int fieldIndex) {
-        if (field instanceof HasElement) {
-            ((HasElement) field).getElement().executeJs(
+        if (field instanceof HasElement hasElement) {
+            hasElement.getElement().executeJs(
                     "customElements.get('vaadin-field-highlighter')"
                             + ".addUser(this, $0)",
                     serialize(user, fieldIndex));
@@ -103,20 +107,20 @@ class FieldHighlighter extends FieldHighlighterInitializer
     }
 
     void removeEditor(HasValue<?, ?> field, UserInfo user, int fieldIndex) {
-        if (field instanceof HasElement) {
-            ((HasElement) field).getElement().executeJs(
+        if (field instanceof HasElement hasElement) {
+            hasElement.getElement().executeJs(
                     "customElements.get('vaadin-field-highlighter')"
                             + ".removeUser(this, $0)",
                     serialize(user, fieldIndex));
         }
     }
 
-    private JsonArray serialize(Stream<FocusedEditor> editors) {
-        return editors.map(this::serialize).collect(JsonUtils.asArray());
+    private ArrayNode serialize(Stream<FocusedEditor> editors) {
+        return editors.map(this::serialize).collect(JacksonUtils.asArray());
     }
 
-    private JsonObject serialize(FocusedEditor focusedEditor) {
-        JsonObject editorJson = Json.createObject();
+    private ObjectNode serialize(FocusedEditor focusedEditor) {
+        var editorJson = JsonNodeFactory.instance.objectNode();
         editorJson.put("id", focusedEditor.user.getId());
         editorJson.put("name",
                 Objects.toString(focusedEditor.user.getName(), ""));
@@ -126,8 +130,8 @@ class FieldHighlighter extends FieldHighlighterInitializer
         return editorJson;
     }
 
-    private JsonObject serialize(UserInfo user, int fieldIndex) {
-        JsonObject editorJson = Json.createObject();
+    private ObjectNode serialize(UserInfo user, int fieldIndex) {
+        var editorJson = JsonNodeFactory.instance.objectNode();
         editorJson.put("id", user.getId());
         editorJson.put("name", Objects.toString(user.getName(), ""));
         editorJson.put("colorIndex", colorIndexProvider.apply(user));
