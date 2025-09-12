@@ -15,9 +15,13 @@
  */
 package com.vaadin.collaborationengine;
 
+import static com.vaadin.collaborationengine.MockJson.LIST_STRING_TYPE_REF;
+
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -76,6 +80,38 @@ public class FormManagerTest {
 
         Assert.assertTrue(entries.containsKey("foo"));
         Assert.assertEquals("bar", entries.get("foo"));
+    }
+
+    @Test
+    public void handler_getValue_typeIsCorrect() {
+        Map<String, Object> entries = new HashMap<>();
+        FormManager manager = createActiveManager();
+
+        manager.setPropertyChangeHandler(event -> entries
+                .put(event.getPropertyName(), event.getValue(UserInfo.class)));
+        manager.setValue("foo", user);
+
+        Assert.assertTrue(entries.containsKey("foo"));
+        Assert.assertEquals(UserInfo.class, entries.get("foo").getClass());
+        Assert.assertEquals(user, entries.get("foo"));
+    }
+
+    @Test
+    public void handler_getValue_typeRefIsCorrect() {
+        Map<String, Object> entries = new HashMap<>();
+        FormManager manager = createActiveManager();
+
+        manager.setPropertyChangeHandler(event -> entries.put(
+                event.getPropertyName(), event.getValue(LIST_STRING_TYPE_REF)));
+        List<String> list = new ArrayList<>();
+        list.add("foo");
+        list.add("bar");
+        manager.setValue("foo", list);
+
+        Assert.assertTrue(entries.containsKey("foo"));
+        Assert.assertEquals(List.class,
+                entries.get("foo").getClass().getInterfaces()[0]);
+        Assert.assertEquals(list, entries.get("foo"));
     }
 
     @Test
