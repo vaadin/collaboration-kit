@@ -382,8 +382,7 @@ public class FormManager extends AbstractCollaborationManager
     }
 
     private void onMapChange(MapChangeEvent event) {
-        applyPropertyChangeHandler(event.getKey(),
-                event.getValue(Object.class));
+        applyPropertyChangeHandler(event.getKey(), event);
     }
 
     private void onListChange(ListChangeEvent event) {
@@ -406,10 +405,11 @@ public class FormManager extends AbstractCollaborationManager
         }
     }
 
-    private void applyPropertyChangeHandler(String propertyName, Object value) {
+    private void applyPropertyChangeHandler(String propertyName,
+            MapChangeEvent mapChangeEvent) {
         if (propertyChangeHandler != null) {
             PropertyChangeHandler.PropertyChangeEvent event = new DefaultPropertyChangeEvent(
-                    propertyName, value);
+                    propertyName, mapChangeEvent);
             propertyChangeHandler.handlePropertyChange(event);
         }
     }
@@ -456,11 +456,12 @@ public class FormManager extends AbstractCollaborationManager
 
     static class DefaultPropertyChangeEvent implements PropertyChangeEvent {
         private final String propertyName;
-        private final Object value;
+        private final MapChangeEvent event;
 
-        public DefaultPropertyChangeEvent(String propertyName, Object value) {
+        public DefaultPropertyChangeEvent(String propertyName,
+                MapChangeEvent event) {
             this.propertyName = propertyName;
-            this.value = value;
+            this.event = event;
         }
 
         @Override
@@ -470,7 +471,17 @@ public class FormManager extends AbstractCollaborationManager
 
         @Override
         public Object getValue() {
-            return value;
+            return event.getValue(Object.class);
+        }
+
+        @Override
+        public <T> T getValue(Class<T> type) {
+            return event.getValue(type);
+        }
+
+        @Override
+        public <T> T getValue(TypeReference<T> typeRef) {
+            return event.getValue(typeRef);
         }
     }
 
