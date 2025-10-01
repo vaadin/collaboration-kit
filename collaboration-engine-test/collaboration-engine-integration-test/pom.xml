@@ -25,6 +25,7 @@
             <groupId>com.vaadin</groupId>
             <artifactId>collaboration-engine</artifactId>
             <version>7.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         
         <dependency>
