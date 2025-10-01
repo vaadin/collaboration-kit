@@ -17,7 +17,7 @@ package com.vaadin.collaborationengine;
 
 import java.util.EventObject;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Event that is fired when the value in a collaboration list changes.

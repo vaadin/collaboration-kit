@@ -22,9 +22,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.collaborationengine.util.TestEnum;
+
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 public class MockJson {
     public static final JsonNode FOO = JsonUtil.toJsonNode("foo");

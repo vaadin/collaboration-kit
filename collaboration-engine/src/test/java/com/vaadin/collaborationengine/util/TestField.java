@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.Focusable;
@@ -28,6 +27,8 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+
+import tools.jackson.databind.node.JsonNodeFactory;
 
 @Tag("test-field")
 public class TestField extends AbstractField<TestField, String>

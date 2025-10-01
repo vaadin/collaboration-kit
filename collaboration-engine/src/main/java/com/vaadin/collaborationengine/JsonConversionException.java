@@ -17,7 +17,7 @@ package com.vaadin.collaborationengine;
 
 /**
  * Thrown when unable to convert back and forth between a Java object instance
- * and a Jackson {@link com.fasterxml.jackson.databind.JsonNode} instance. The
+ * and a Jackson {@link tools.jackson.databind.JsonNode} instance. The
  * conversion is necessary for sending the Java object over the network.
  *
  * @author Vaadin Ltd

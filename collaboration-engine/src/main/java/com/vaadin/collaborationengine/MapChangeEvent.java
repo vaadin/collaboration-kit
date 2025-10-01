@@ -18,8 +18,8 @@ package com.vaadin.collaborationengine;
 import java.util.EventObject;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Event that is fired when the value in a collaboration map changes.
