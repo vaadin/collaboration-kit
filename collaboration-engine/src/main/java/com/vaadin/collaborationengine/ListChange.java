@@ -17,8 +17,9 @@ package com.vaadin.collaborationengine;
 
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.collaborationengine.Topic.ChangeDetails;
+
+import tools.jackson.databind.JsonNode;
 
 class ListChange implements ChangeDetails {
     private final String listName;

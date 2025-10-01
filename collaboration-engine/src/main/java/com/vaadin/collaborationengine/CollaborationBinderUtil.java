@@ -17,9 +17,10 @@ package com.vaadin.collaborationengine;
 
 import java.util.Objects;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import com.vaadin.collaborationengine.FormManager.FocusedEditor;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.NullNode;
 
 /**
  * Utility methods for {@link CollaborationBinder}.

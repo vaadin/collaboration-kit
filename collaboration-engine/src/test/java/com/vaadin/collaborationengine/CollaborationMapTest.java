@@ -32,11 +32,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.vaadin.collaborationengine.util.MockConnectionContext;
 import com.vaadin.collaborationengine.util.MockConnectionContext.MockActionDispatcher;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 
 public class CollaborationMapTest {
 
@@ -312,7 +313,7 @@ public class CollaborationMapTest {
         map.put("key", data);
 
         ArrayNode mapDataNode = map.get("key", ArrayNode.class);
-        mapDataNode.set(0, new TextNode("baz"));
+        mapDataNode.set(0, JsonNodeFactory.instance.textNode("baz"));
 
         Assert.assertTrue(
                 "The returned value shouldn't affect map data in the topic.",

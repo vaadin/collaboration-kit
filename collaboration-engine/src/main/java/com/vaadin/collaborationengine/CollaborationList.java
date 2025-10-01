@@ -22,8 +22,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.core.type.TypeReference;
 
 /**
  * A list that is shared between multiple users. List instances can be retrieved

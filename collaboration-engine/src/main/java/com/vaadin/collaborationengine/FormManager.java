@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.vaadin.collaborationengine.HighlightHandler.HighlightContext;
 import com.vaadin.collaborationengine.PropertyChangeHandler.PropertyChangeEvent;
 import com.vaadin.flow.component.Component;
@@ -35,6 +34,8 @@ import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Manager to handle form values and field highlight state. It allows to set a

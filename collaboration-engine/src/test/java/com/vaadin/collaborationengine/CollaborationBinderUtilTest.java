@@ -48,9 +48,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.collaborationengine.util.TestEnum;
+
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 
 public class CollaborationBinderUtilTest
         extends AbstractCollaborationBinderTest {

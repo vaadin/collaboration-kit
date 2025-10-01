@@ -17,7 +17,6 @@ package com.vaadin.collaborationengine;
 
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
@@ -26,6 +25,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.shared.communication.PushMode;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * The main view contains a button and a collaborative div which shows the

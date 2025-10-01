@@ -24,11 +24,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.collaborationengine.util.MockService;
 import com.vaadin.flow.server.VaadinService;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.NullNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class JsonUtilTest {
 
@@ -67,12 +68,16 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void usersList_toJson_noRedundantData() {
+    public void usersList_toJson_noRedundantData() throws Exception {
         List<UserInfo> users = Collections.singletonList(user);
-        String jsonUsers = JsonUtil.toJsonNode(users).toString();
-        Assert.assertEquals(
-                "[{\"id\":\"my-id\",\"name\":\"my-name\",\"abbreviation\":\"my-abbreviation\",\"image\":\"my-image\",\"colorIndex\":5}]",
-                jsonUsers);
+        JsonNode actualJson = JsonUtil.toJsonNode(users);
+
+        // Create expected JSON structure programmatically to avoid ordering
+        // issues
+        JsonNode expectedJson = JsonUtil.getObjectMapper().readTree(
+                "[{\"id\":\"my-id\",\"name\":\"my-name\",\"abbreviation\":\"my-abbreviation\",\"image\":\"my-image\",\"colorIndex\":5}]");
+
+        Assert.assertEquals(expectedJson, actualJson);
     }
 
     @Test

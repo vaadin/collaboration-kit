@@ -29,8 +29,8 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -41,7 +41,7 @@
         <vaadin.lumo.version>${vaadin.component.version}</vaadin.lumo.version>
 
         <!-- Keep in sync with flow-server: -->
-        <jackson.version>2.19.1</jackson.version>
+        <jackson.version>3.0.0-rc10</jackson.version>
         <junit.version>4.13.2</junit.version>
         <jetty.version>11.0.25</jetty.version>
 
@@ -58,7 +58,7 @@
                 <version>${junit.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
+                <groupId>tools.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
                 <type>pom</type>
                 <scope>import</scope>

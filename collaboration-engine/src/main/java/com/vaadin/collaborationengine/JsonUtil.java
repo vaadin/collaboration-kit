@@ -15,7 +15,6 @@
  */
 package com.vaadin.collaborationengine;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -25,14 +24,15 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
+// JavaTimeModule is now built-in to Jackson 3 databind
 
 /**
  * Utility methods to create JSON nodes.
@@ -112,9 +112,10 @@ class JsonUtil {
     private static final ObjectMapper mapper;
 
     static {
-        mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        // JavaTimeModule is now built-in to Jackson 3
+        // Use Jackson 2 defaults for backward compatibility
+        mapper = JsonMapper.builderWithJackson2Defaults()
+                .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS).build();
     }
 
     private JsonUtil() {
@@ -141,7 +142,7 @@ class JsonUtil {
         }
         try {
             return mapper.treeToValue(jsonNode, type);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new JsonConversionException(
                     "Failed to parse the JSON node to " + type.getName(), e);
         }
@@ -168,7 +169,7 @@ class JsonUtil {
         JavaType javaType = mapper.getTypeFactory().constructType(type);
         try {
             return mapper.readValue(mapper.treeAsTokens(jsonNode), javaType);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new JsonConversionException(
                     "Failed to parse the JSON node to "
                             + javaType.getTypeName(),
@@ -349,7 +350,7 @@ class JsonUtil {
         } else {
             try {
                 return mapper.writeValueAsString(value);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new JsonConversionException(
                         "Failed to serialize the object to string.", e);
             }
@@ -369,7 +370,7 @@ class JsonUtil {
         } else {
             try {
                 return (ObjectNode) mapper.readTree(value);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 throw new JsonConversionException(
                         "Failed to read the object from string.", e);
             }

@@ -17,7 +17,7 @@ package com.vaadin.collaborationengine;
 
 import java.io.Serializable;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Functional interface that defines how to handle value changes for properties

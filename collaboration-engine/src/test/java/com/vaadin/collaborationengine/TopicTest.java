@@ -23,9 +23,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.collaborationengine.Topic.ChangeResult;
 import com.vaadin.collaborationengine.util.TestUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 public class TopicTest {
 

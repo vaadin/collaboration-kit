@@ -31,9 +31,6 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.vaadin.collaborationengine.util.GenericTestField;
 import com.vaadin.collaborationengine.util.TestBean;
 import com.vaadin.collaborationengine.util.TestField;
@@ -48,6 +45,9 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.NullNode;
 
 public class CollaborationBinderTest extends AbstractCollaborationBinderTest {
 
@@ -596,7 +596,7 @@ public class CollaborationBinderTest extends AbstractCollaborationBinderTest {
         field.setValue(new TestBean("Lorem"));
         JsonNode value = CollaborationBinderUtil.getFieldValue(topicConnection,
                 "testBean");
-        Assert.assertEquals(TextNode.class, value.getClass());
+        Assert.assertTrue("Expected text node", value.isTextual());
         Assert.assertEquals("Lorem", JsonUtil.toInstance(value, String.class));
 
         CollaborationBinderUtil.setFieldValue(topicConnection, "testBean",
@@ -618,7 +618,7 @@ public class CollaborationBinderTest extends AbstractCollaborationBinderTest {
         field.setValue(new TestBean("Lorem"));
         JsonNode value = CollaborationBinderUtil.getFieldValue(topicConnection,
                 "value");
-        Assert.assertEquals(TextNode.class, value.getClass());
+        Assert.assertTrue("Expected text node", value.isTextual());
         Assert.assertEquals("Lorem", JsonUtil.toInstance(value, String.class));
 
         CollaborationBinderUtil.setFieldValue(topicConnection, "value",

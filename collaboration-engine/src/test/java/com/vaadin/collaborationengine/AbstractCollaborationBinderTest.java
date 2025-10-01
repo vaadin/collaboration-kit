@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import org.junit.After;
 import org.junit.Before;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.collaborationengine.util.MockService;
 import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.TestBean;
@@ -35,6 +34,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.VaadinService;
+
+import tools.jackson.databind.JsonNode;
 
 public class AbstractCollaborationBinderTest {
 
