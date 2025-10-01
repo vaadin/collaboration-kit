@@ -35,10 +35,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.vaadin.collaborationengine.HighlightHandler.HighlightContext;
 import com.vaadin.collaborationengine.PropertyChangeHandler.PropertyChangeEvent;
 import com.vaadin.flow.component.Component;
@@ -54,6 +50,11 @@ import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.NullNode;
 
 /**
  * Extension of {@link Binder} for creating collaborative forms with
@@ -900,7 +901,8 @@ public class CollaborationBinder<BEAN> extends Binder<BEAN>
 
         typeConfigurations.put(type,
                 new JsonHandler<T>(
-                        value -> new TextNode(serializer.apply(value)),
+                        value -> JsonNodeFactory.instance
+                                .textNode(serializer.apply(value)),
                         jsonNode -> deserializer.apply(jsonNode.asText())));
     }
 

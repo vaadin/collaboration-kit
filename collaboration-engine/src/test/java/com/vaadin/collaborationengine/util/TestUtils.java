@@ -31,11 +31,12 @@ import java.util.function.Consumer;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.databind.node.NullNode;
 import com.vaadin.collaborationengine.CollaborationEngine;
 import com.vaadin.collaborationengine.CollaborationMap;
 import com.vaadin.collaborationengine.TopicConnection;
 import com.vaadin.collaborationengine.UserInfo;
+
+import tools.jackson.databind.node.NullNode;
 
 public class TestUtils {
 

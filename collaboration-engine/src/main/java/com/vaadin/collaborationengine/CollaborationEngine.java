@@ -37,7 +37,6 @@ import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.collaborationengine.Backend.EventLog;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.di.Instantiator;
@@ -49,6 +48,7 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.shared.Registration;
 
 import jakarta.servlet.ServletContext;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * CollaborationEngine is an API for creating collaborative experiences in

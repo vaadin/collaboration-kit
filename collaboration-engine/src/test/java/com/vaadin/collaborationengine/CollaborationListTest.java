@@ -32,9 +32,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.vaadin.collaborationengine.util.MockConnectionContext;
 import com.vaadin.collaborationengine.util.MockConnectionContext.MockActionDispatcher;
+
+import tools.jackson.core.type.TypeReference;
 
 public class CollaborationListTest {
 
