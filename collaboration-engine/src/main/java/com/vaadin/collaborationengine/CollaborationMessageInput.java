@@ -24,6 +24,8 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
+import com.vaadin.flow.component.messages.MessageInputVariant;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.internal.UsageStatistics;
@@ -43,7 +45,7 @@ import com.vaadin.flow.shared.Registration;
  */
 public class CollaborationMessageInput extends Composite<MessageInput>
         implements Focusable<CollaborationMessageInput>, HasSize, HasStyle,
-        HasEnabled, HasTooltip {
+        HasEnabled, HasTooltip, HasThemeVariant<MessageInputVariant> {
 
     static {
         UsageStatistics.markAsUsed(
