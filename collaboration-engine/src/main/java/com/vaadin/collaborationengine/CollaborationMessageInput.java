@@ -44,8 +44,8 @@ import com.vaadin.flow.shared.Registration;
  * @since 3.1
  */
 public class CollaborationMessageInput extends Composite<MessageInput>
-        implements Focusable<MessageInput>, HasSize, HasStyle, HasEnabled,
-        HasTooltip, HasThemeVariant<MessageInputVariant> {
+        implements Focusable<CollaborationMessageInput>, HasSize, HasStyle,
+        HasEnabled, HasTooltip, HasThemeVariant<MessageInputVariant> {
 
     static {
         UsageStatistics.markAsUsed(
