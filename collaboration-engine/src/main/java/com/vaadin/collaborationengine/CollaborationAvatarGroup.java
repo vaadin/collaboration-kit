@@ -33,8 +33,6 @@ import com.vaadin.flow.component.avatar.AvatarGroupVariant;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.UsageStatistics;
-import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
@@ -47,33 +45,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  */
 public class CollaborationAvatarGroup extends Composite<AvatarGroup> implements
         HasSize, HasStyle, HasTheme, HasThemeVariant<AvatarGroupVariant> {
-
-    /**
-     * Callback for creating a stream resource with the image for a specific
-     * user. This allows loading the user image from a dynamic location such as
-     * a database.
-     *
-     * @see StreamResource
-     * @see CollaborationAvatarGroup#setImageProvider(ImageProvider)
-     * @since 1.0
-     * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
-     */
-    @FunctionalInterface
-    @Deprecated(since = "6.5", forRemoval = true)
-    public interface ImageProvider {
-        /**
-         * Gets a stream resource that provides the avatar image for the given
-         * user.
-         *
-         * @param user
-         *            the user for which to get a stream resource with the
-         *            image, not <code>null</code>
-         * @return the stream resource to use for the image, or
-         *         <code>null</code> to not show use any avatar image for the
-         *         given user
-         */
-        AbstractStreamResource getImageResource(UserInfo user);
-    }
 
     /**
      * Callback for creating a download handler for the avatar image for a
@@ -108,8 +79,6 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup> implements
     private PresenceManager presenceManager;
 
     private String topicId;
-
-    private ImageProvider imageProvider;
 
     private ImageHandler imageHandler;
 
@@ -292,8 +261,6 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup> implements
 
         if (imageHandler != null) {
             item.setImageHandler(imageHandler.getDownloadHandler(user));
-        } else if (imageProvider != null) {
-            item.setImageResource(imageProvider.getImageResource(user));
         } else {
             item.setImage(user.getImage());
         }
@@ -308,60 +275,6 @@ public class CollaborationAvatarGroup extends Composite<AvatarGroup> implements
 
     private boolean isNotLocalUser(UserInfo user) {
         return !localUser.equals(user);
-    }
-
-    /**
-     * Sets an image provider callback for dynamically loading avatar images for
-     * a given user. The image can be loaded on-demand from a database or using
-     * any other source of IO streams.
-     * <p>
-     * If no image callback is defined, then the image URL defined by
-     * {@link UserInfo#getImage()} is directly passed to the browser. This means
-     * that avatar images need to be available as static files or served
-     * dynamically from a custom servlet. This is the default.
-     * <p>
-     *
-     * Usage example:
-     *
-     * <pre>
-     * collaborationAvatarGroup.setImageProvider(userInfo -> {
-     *     StreamResource streamResource = new StreamResource(
-     *             "avatar_" + userInfo.getId(), () -> {
-     *                 User userEntity = userRepository
-     *                         .findById(userInfo.getId());
-     *                 byte[] profilePicture = userEntity.getProfilePicture();
-     *                 return new ByteArrayInputStream(profilePicture);
-     *             });
-     *     streamResource.setContentType("image/png");
-     *     return streamResource;
-     * });
-     * </pre>
-     *
-     * @param imageProvider
-     *            the image provider to use, or <code>null</code> to use image
-     *            URLs directly from the user info object
-     * @since 1.0
-     * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
-     */
-    @Deprecated(since = "6.5", forRemoval = true)
-    public void setImageProvider(ImageProvider imageProvider) {
-        this.imageProvider = imageProvider;
-        refreshItems();
-    }
-
-    /**
-     * Gets the currently used image provider callback.
-     *
-     * @see #setImageProvider(ImageProvider)
-     *
-     * @return the current image provider callback, or <code>null</code> if no
-     *         callback is set
-     * @since 1.0
-     * @deprecated Use {@link #setImageHandler(ImageHandler)} instead.
-     */
-    @Deprecated(since = "6.5", forRemoval = true)
-    public ImageProvider getImageProvider() {
-        return imageProvider;
     }
 
     /**
