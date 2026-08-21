@@ -200,7 +200,7 @@ Look up the state through the bean whenever it's needed, and store the resulting
 
 Collaboration Kit's expiration timeout drops topic data after a quiet period. The registry needs to do this explicitly, otherwise every document ever opened stays in memory for the lifetime of the application.
 
-Count the views currently using a state and discard it when the count reaches zero:
+Count the views currently using a state and discard it when the count reaches zero. Expose the two halves as a symmetric pair:
 
 [source,java]
 ----
@@ -209,26 +209,52 @@ private record Ref(DocumentState state, AtomicInteger users) {
 
 private final Map<String, Ref> refs = new ConcurrentHashMap<>();
 
-public DocumentState acquire(String documentId, Component owner) {
-    Ref ref = refs.compute(documentId, (id, existing) -> {
-        Ref result = existing != null ? existing
+public DocumentState retain(String documentId) {
+    return refs.compute(documentId, (id, existing) -> {
+        Ref ref = existing != null ? existing
                 : new Ref(DocumentState.create(
                         PersonForm.of(personService.findById(id))),
                         new AtomicInteger());
-        result.users().incrementAndGet();
-        return result;
-    });
-    owner.addDetachListener(event -> release(documentId));
-    return ref.state();
+        ref.users().incrementAndGet();
+        return ref;
+    }).state();
 }
 
-private void release(String documentId) {
+public void release(String documentId) {
     refs.computeIfPresent(documentId,
             (id, ref) -> ref.users().decrementAndGet() > 0 ? ref : null);
 }
 ----
 
-Discarding immediately is the equivalent of `Duration.ZERO`. To reproduce a grace period, schedule the removal instead of performing it directly, and cancel the scheduled task if a new user arrives first.
+Call the pair from attach and detach, the same way <<#tracking-presence,`trackPresence()`>> does, and guard against two calls in a row on the same side:
+
+[source,java]
+----
+public static DocumentState hold(Component owner, String documentId,
+        DocumentStateRegistry registry) {
+    AtomicBoolean held = new AtomicBoolean(true);
+
+    owner.addAttachListener(event -> {
+        if (held.compareAndSet(false, true)) {
+            registry.retain(documentId);
+        }
+    });
+
+    owner.addDetachListener(event -> {
+        if (held.compareAndSet(true, false)) {
+            registry.release(documentId);
+        }
+    });
+
+    return registry.retain(documentId);
+}
+----
+
+Registering only the detach listener is a mistake that's easy to make and hard to see. A view that's detached and attached again -- navigating back to a retained view, a `@PreserveOnRefresh` view surviving a reload, a component moved between layouts, a dialog reopened -- then releases more times than it retains. The count reaches zero while the view is still open, the state is dropped, and the next user to open the same document gets a fresh [classname]`DocumentState` and silently stops sharing anything with them.
+
+.Give Release a Grace Period
+[IMPORTANT]
+Discarding at zero immediately is the equivalent of `Duration.ZERO`, and it has the same drawback: a view that reattaches a moment later gets a different instance than the one its bindings were built against. Schedule the removal instead of performing it directly, and cancel the scheduled task if the count rises again. For a view that can stay detached for longer than that window, resolve the state inside the attach listener and rebuild the bindings from it, rather than caching the instance from the constructor.
 
 
 == Step 2: Replace UserInfo
@@ -263,6 +289,7 @@ Keep the record small and free of framework types. A [interfacename]`DownloadHan
 [classname]`CollaborationAvatarGroup` combines two things: tracking who's present, and rendering them. With signals, these are separate.
 
 
+[[tracking-presence]]
 === Tracking Presence
 
 [classname]`PresenceManager` writes the local user into the topic with `EntryScope.CONNECTION`, so the entry vanishes when the connection deactivates. Signals need the two halves written explicitly, on attach and on detach:
@@ -366,11 +393,18 @@ public record PersonForm(String firstName, String lastName, Long supervisorId) {
 
 ComboBox<Person> supervisor = new ComboBox<>("Supervisor");
 supervisor.setItems(personService.findSupervisors());
-supervisor.bindValue(
-        form.map(value -> personService.findById(value.supervisorId())),
-        form.updater((value, person) -> value
-                .withSupervisorId(person != null ? person.getId() : null)));
+// Cached so that the chain is cut off when the identifier is unchanged
+Signal<Long> supervisorId = Signal.cached(() -> form.get().supervisorId());
+Signal<Person> supervisorValue = Signal.cached(() -> {
+    Long id = supervisorId.get();
+    return id != null ? personService.findById(id) : null;
+});
+
+supervisor.bindValue(supervisorValue, form.updater((value, person) -> value
+        .withSupervisorId(person != null ? person.getId() : null)));
 ----
+
+Two details matter here. The identifier is nullable, because the write callback stores `null` whenever the field is cleared, so the lookup needs a guard. And a plain `form.map(value -> personService.findById(value.supervisorId()))` is derived from the whole record, which means the backend call runs again on every change to *any* property, including each keystroke in an unrelated text field. Caching the identifier first cuts the chain: the outer cached signal isn't invalidated while the identifier produces the same value, so the lookup runs only when the supervisor actually changes.
 
 
 === Per-Property State
@@ -427,7 +461,14 @@ Track who's editing which property in a map keyed by property name:
 SharedMapSignal<Collaborator> editors = state.editors();
 
 firstName.addFocusListener(event -> editors.put("firstName", localUser));
-firstName.addBlurListener(event -> editors.remove("firstName"));
+firstName.addBlurListener(event -> Signal.runInTransaction(() -> {
+    SharedValueSignal<Collaborator> entry = editors.get().get("firstName");
+    if (entry != null) {
+        // Clear the entry only while it still belongs to this user
+        entry.verifyValue(localUser);
+        editors.remove("firstName");
+    }
+}));
 ----
 
 Then bind the field's appearance to that entry, ignoring the local user's own focus:
@@ -462,7 +503,9 @@ vaadin-text-field.being-edited {
 
 Editor entries need the same cleanup as presence entries: remove the local user's entries in a detach listener, otherwise a user who navigates away while focused leaves a field highlighted forever.
 
-A map keyed by property name records one editor per field, which is enough for most forms. To show every user editing a field at once, as Collaboration Kit does, store a [classname]`SharedListSignal` of collaborators per property instead.
+The blur handler has to check before it removes. With one entry per property, a second user focusing the field overwrites the first user's entry, and an unconditional [methodname]`remove()` on blur would then delete an entry that belongs to somebody still editing. Wrapping the check and the removal in a transaction with [methodname]`verifyValue()` makes the pair atomic against a concurrent focus.
+
+A map keyed by property name records one editor per field, which is enough for most forms. To show every user editing a field at once, as Collaboration Kit does, store a [classname]`SharedListSignal` of collaborators per property instead -- each user then adds and removes only their own entry, and the clobbering problem disappears.
 
 .Highlighting Without a Binder
 [TIP]
@@ -552,7 +595,7 @@ Views that use [classname]`CollaborationMap` and [classname]`CollaborationList` 
 | `map.remove(key)`
 
 | `map.replace(key, expected, value)`
-| A transaction with [methodname]`verifyKey()` and [methodname]`put()`
+| [methodname]`replace()` on the entry signal
 
 | `map.getKeys()`
 | `map.peek().keySet().stream()`
@@ -562,6 +605,8 @@ Views that use [classname]`CollaborationMap` and [classname]`CollaborationList` 
 |===
 
 A key that no user has written yet has no entry signal, so guard [methodname]`peek().get(key)` against `null`. Where Collaboration Kit uses a conditional [methodname]`replace()` to avoid overwriting another user's initialization, [classname]`SharedMapSignal` offers [methodname]`putIfAbsent()`, which [classname]`CollaborationMap` does not have.
+
+[classname]`SharedMapSignal` has its own [methodname]`verifyKey()`, but it isn't the counterpart of [methodname]`CollaborationMap::replace`: it checks that a key maps to a particular *child signal*, not that the entry holds a particular *value*. Compare values with [methodname]`replace()` or [methodname]`verifyValue()` on the entry signal itself. [methodname]`verifyHasKey()` and [methodname]`verifyKeyAbsent()` cover the presence of a key.
 
 Use [methodname]`get()` inside effects, computed signals, and transactions, where it registers a reactive dependency. Use [methodname]`peek()` everywhere else -- click listeners, initialization code, background jobs. Calling [methodname]`get()` outside a reactive context throws [classname]`IllegalStateException`.
 
@@ -632,7 +677,7 @@ Signal.runInTransaction(() -> {
 
 * `ifFirst(key)` and `ifLast(key)` become [methodname]`verifyPosition()` with `ListPosition.first()` or `ListPosition.last()`.
 * `ifPrev(key, prev)` and `ifNext(key, next)` become [methodname]`verifyPosition()` with `ListPosition.after()` or `ListPosition.before()`.
-* A conditional map replace becomes [methodname]`verifyKey()`, or [methodname]`replace()` on the entry signal.
+* A conditional map replace becomes [methodname]`replace()` on the entry signal, or [methodname]`verifyValue()` on the entry inside a transaction. It doesn't become [methodname]`verifyKey()`, which compares child signals rather than values.
 * `ifEmpty()` and `ifNotEmpty()` have no direct equivalent. Where they guard against duplicate initialization, [methodname]`putIfAbsent()` on a map signal expresses the intent better.
 
 Use [methodname]`verifyChild()` before updating an entry that another user might have removed in the meantime. Collaboration Kit's conditions are per-operation; a signals transaction can verify several conditions and apply several changes atomically, which is more expressive.
