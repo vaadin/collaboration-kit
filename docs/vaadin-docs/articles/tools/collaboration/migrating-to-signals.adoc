@@ -34,15 +34,13 @@ Read this section first. It describes what changes conceptually, and it lists th
 
 === When Not to Migrate Yet
 
-Signals don't cover every Collaboration Kit capability. Postpone the migration if the application depends on any of these:
+Two Collaboration Kit capabilities have no signals equivalent at all, and both are properties of the deployment rather than of a feature. Stop here if the application depends on either:
 
-*Clustering*:: Collaboration Kit has an experimental <<advanced/backend-api#,`Backend` API>> for clustered deployments. Shared signals are limited to a single JVM: each signal owns a local tree, and Vaadin doesn't yet ship a distributed implementation. In a cluster, users on different nodes don't see each other's changes.
+*Clustering*:: Collaboration Kit has an experimental <<advanced/backend-api#,`Backend` API>> that shares topic data between nodes. Shared signals are single-JVM only.
 
-*Automatic cleanup of disconnected users*:: `EntryScope.CONNECTION` removes an entry as soon as the connection that wrote it goes away, including when a browser tab is closed. Signals have no equivalent, so presence entries have to be removed explicitly. See <<#step-3-presence-and-avatars,Presence and Avatars>>.
+*Session serialization*:: Collaboration Kit documents which of its classes are safe to keep in the HTTP session, which is what makes session replication work. A shared signal can't be serialized at all.
 
-*Topic expiration timeouts*:: [methodname]`setExpirationTimeout()` discards topic data after a period with no connected users. With signals, the lifetime of the state is the lifetime of the object holding it, so your registry has to do the discarding.
-
-Everything else in Collaboration Kit has a signals equivalent, though several of them are patterns you assemble rather than components you instantiate.
+Both are covered in detail, with the reasoning and the observable symptoms, in <<#gaps,Gaps and Cases That Can't Be Migrated>>. That section also lists the features that *can* be migrated but only by rebuilding behavior Collaboration Kit provides out of the box, and the smaller API-level differences worth knowing before starting.
 
 
 === Push Is Required
@@ -196,6 +194,7 @@ public class DocumentStateRegistry {
 Look up the state through the bean whenever it's needed, and store the resulting signals in fields of the view only. Holding the registry in a session attribute has the same drawbacks that <<advanced/serialization#,storing `CollaborationEngine` in the session>> has.
 
 
+[[discarding-unused-state]]
 === Discarding Unused State
 
 Collaboration Kit's expiration timeout drops topic data after a quiet period. The registry needs to do this explicitly, otherwise every document ever opened stays in memory for the lifetime of the application.
@@ -257,6 +256,7 @@ Registering only the detach listener is a mistake that's easy to make and hard t
 Discarding at zero immediately is the equivalent of `Duration.ZERO`, and it has the same drawback: a view that reattaches a moment later gets a different instance than the one its bindings were built against. Schedule the removal instead of performing it directly, and cancel the scheduled task if the count rises again. For a view that can stay detached for longer than that window, resolve the state inside the attach listener and rebuild the bindings from it, rather than caching the instance from the constructor.
 
 
+[[step-2-replace-userinfo]]
 == Step 2: Replace UserInfo
 
 [classname]`UserInfo` carries an identifier, a display name, an abbreviation, an image URL, and a color index. Signals have no user model, so define a record that carries exactly what the UI needs. Values stored in shared signals are converted to JSON with Jackson, and records serialize cleanly:
@@ -450,6 +450,7 @@ save.addClickListener(event -> personService.save(form.peek()));
 ----
 
 
+[[step-5-field-highlighting]]
 == Step 5: Field Highlighting
 
 Collaboration Kit shows a colored outline and the editor's name around a field that another user has focused. The mechanism behind it isn't public API, so reproduce the behavior with a second shared signal and CSS bindings.
@@ -549,6 +550,7 @@ This covers [classname]`CollaborationMessageList`, [classname]`CollaborationMess
 [methodname]`setMessageConfigurator()` becomes ordinary code in the mapping function -- that's where a censoring rule or a per-user style is applied. [methodname]`setMarkdown()` and [methodname]`setAnnounceMessages()` are properties of [classname]`MessageList` itself and carry over unchanged.
 
 
+[[persisting-messages]]
 === Persisting Messages
 
 [interfacename]`CollaborationMessagePersister` exists because Collaboration Kit owns the message store and needs a hook into yours. With signals, your code owns both sides, so persistence is a plain write-through: save first, then insert what the backend returned.
@@ -699,9 +701,149 @@ public void notifyUsers(SharedListSignal<ChatMessage> messages, String text) {
 Every effect and binding that depends on the signal runs on the correct UI, and push delivers the change.
 
 
+[[gaps]]
+== Gaps and Cases That Can't Be Migrated
+
+The mapping in the previous sections covers the common cases. This section is the inventory of what doesn't map: what makes migration impossible today, what migrates only at the cost of rebuilding something, and where the two APIs differ in ways that are easy to trip over.
+
+
+=== Blockers
+
+Neither of these has a workaround that keeps the benefits of migrating.
+
+
+==== Clustered Deployments
+
+Collaboration Kit's [classname]`Backend` SPI, enabled through the `collaborationEngineBackend` <<{articles}/flow/configuration/feature-flags#,feature flag>>, replicates an ordered event log between nodes; the documentation walks through a Hazelcast implementation. Shared signals have no such SPI. Every shared signal created through a public constructor owns a local tree, and the constructor documentation states outright that the signal doesn't support clustering. [methodname]`peekConfirmed()` exists for the distributed case but currently resolves against local confirmation only.
+
+The symptom is quiet rather than loud: nothing fails, but two users routed to different nodes each see a consistent view of their own node's state and never see each other. Sticky sessions don't fix it either, because the point of a topic is that users on *different* sessions share it.
+
+There's no partial workaround worth recommending. Writing every change through a shared database and polling it back reproduces neither the latency nor the transactional guarantees, and it gives up the reason to use signals in the first place. Keep Collaboration Kit for clustered deployments.
+
+
+==== Session Serialization and Kubernetes Kit
+
+Collaboration Kit is explicit about session serialization: <<advanced/serialization#,its own documentation>> lists the classes that must not be stored in the session ([classname]`CollaborationEngine`, [classname]`TopicConnection`, [classname]`CollaborationMap`, [classname]`CollaborationList`) and the ones that are serializable and safe to keep there, including [classname]`CollaborationBinder`, [classname]`CollaborationAvatarGroup`, [classname]`CollaborationMessageList`, and all three managers. That split is what lets <<{articles}/tools/kubernetes#,Kubernetes Kit>> replicate sessions.
+
+Shared signals offer no such split. Serializing one throws [classname]`NotSerializableException` with the message _"Shared Signal is a shared object that cannot be serialized: it is tied to a specific runtime environment and would leak other sessions if included in session serialization."_ The refusal is deliberate, and it applies to every shared signal type, because all the public constructors create the asynchronous tree that rejects serialization.
+
+This reaches further than it first appears. A signal held in a view field is reachable from the session, and so is a signal captured by the lambda behind any `bind*()` call, because the binding is stored on the component. Both make the session graph unserializable.
+
+*Affected*:: Kubernetes Kit session replication, container-managed session persistence, and any serialization-based hand-off of a session between nodes.
+
+*Not affected*:: The registry bean itself. An application-scoped Spring bean isn't session state, so holding the signals there is correct regardless.
+
+*Not affected*:: <<{articles}/flow/ui-state/local-signals#,Local signals>>, which are per-user and don't carry the same restriction.
+
+If the application serializes sessions, keep Collaboration Kit for now.
+
+
+=== Behavior You Have to Rebuild
+
+These migrate, and the guide shows how, but Collaboration Kit does the work for you and signals don't. Budget for them.
+
+
+==== Cleanup When a User Disconnects
+
+`EntryScope.CONNECTION` removes an entry the moment the connection that wrote it deactivates. Collaboration Kit makes that prompt even for a closed tab by installing a beacon request handler, so the browser reports the unload and the avatar disappears within moments.
+
+Signals have neither the scope nor the beacon. A detach listener covers navigation and an orderly close of the view, and that's what <<#tracking-presence,`trackPresence()`>> uses, but nothing fires when the tab is killed, the network drops, or the server is replaced. Those entries survive until the session expires, which is minutes rather than moments.
+
+Treat presence as advisory. Clear entries from a [interfacename]`SessionDestroyListener` in addition to the detach listener, and if stale avatars are unacceptable, store a timestamp alongside each collaborator and filter out entries that haven't been refreshed recently.
+
+
+==== Topic and Entry Expiration
+
+[methodname]`setExpirationTimeout()` is available on [classname]`CollaborationBinder`, [classname]`FormManager`, [classname]`CollaborationMap`, and [classname]`CollaborationList`, and it does two jobs: it frees memory for topics nobody is using, and it repopulates a form from the backend once the last editor has left, so the next user starts from stored data rather than from unsaved edits left by the previous user.
+
+Signals have no lifecycle of their own, so both jobs move to the registry. <<#discarding-unused-state,Discarding Unused State>> covers the memory half. Reloading is a consequence of it: discarding the state means the next lookup recreates it from the backend. Getting the timing right -- long enough that a network blip doesn't wipe an in-progress edit, short enough that stale edits don't greet the next user -- is now your decision rather than a single [classname]`Duration`.
+
+
+==== Automatic User Colors
+
+Collaboration Kit assigns each user a color index on first sight, handing out the seven available values in order, so users active at the same time reliably get distinct colors. The registry that does this lives in [classname]`CollaborationEngine`.
+
+Nothing equivalent ships with signals. Hashing the user identifier, as <<#step-2-replace-userinfo,Step 2>> does, is stable and needs no coordination, but two users in the same topic can collide. Allocating indexes from the collaborator list when a user joins restores the guarantee at the cost of writing the allocator.
+
+
+==== The Field Highlight Overlay
+
+Collaboration Kit renders field highlighting with the `@vaadin/field-highlighter` web component: a colored outline in the editing user's color, that user's name as a label, support for several simultaneous editors on one field, and a field index so that multi-part fields such as a date range highlight the correct sub-field.
+
+The Java side of that component isn't public API -- its setup method is `protected` and the component is driven through internal properties -- so a migration can't reuse it. <<#step-5-field-highlighting,Step 5>> reproduces the effect with a class-name binding and CSS, which covers the common case of one editor per field. Multiple simultaneous editors and sub-field indexes have to be built from scratch, and the result won't be visually identical.
+
+
+==== The Message Persistence Protocol
+
+[interfacename]`CollaborationMessagePersister` is a small protocol rather than a single save hook. The first manager to connect to a topic fetches the history with a [classname]`FetchQuery`, the result is cached in the topic so later managers don't re-query, each submit is written to the backend and then re-fetched from the last known timestamp, and duplicates from the timestamp overlap are filtered out.
+
+With signals the shared list *is* the cache, so most of that protocol becomes unnecessary -- <<#persisting-messages,Persisting Messages>> is a save call followed by an insert. What you lose is the framework's handling of the edge cases the protocol existed for: a write that succeeds in the database but fails before the insert leaves the list short until the state is discarded and reloaded, and messages written to the database by another part of the system don't appear until then either. If either matters, reconcile the list against the backend when the state is created and after a failed write.
+
+
+=== API-Level Differences
+
+Smaller gaps, but each one is a place where a direct translation compiles and then behaves differently.
+
+
+==== Parameterized Value Types
+
+Collaboration Kit accepts a Jackson [classname]`TypeReference` wherever it accepts a [classname]`Class`, which is how [methodname]`CollaborationMap::get` reads a `Set<String>` and how [methodname]`CollaborationBinder::forField` binds a [classname]`CheckboxGroup` by taking the collection type and the element type separately.
+
+Shared signals take a [classname]`Class` only. There's no [classname]`TypeReference` overload anywhere in the API, so a parameterized value type can't be expressed: `new SharedValueSignal<>(Set.class)` loses the element type, and reading it back loses the element type.
+
+Wrap the collection in a record, which is typed all the way down and serializes as an object rather than as a bare array:
+
+[source,java]
+----
+public record Selection(Set<String> values) {
+}
+
+SharedValueSignal<Selection> selection = new SharedValueSignal<>(
+        new Selection(Set.of()));
+
+CheckboxGroup<String> group = new CheckboxGroup<>("Options");
+group.setItems("a", "b", "c");
+group.bindValue(selection.map(Selection::values),
+        values -> selection.set(new Selection(values)));
+----
+
+
+==== No Previous Value or Change Type
+
+A Collaboration Kit subscriber receives an event, and the event describes the change: [classname]`MapChangeEvent` carries the old value next to the new one, and [classname]`ListChangeEvent` adds the change type along with the previous and next keys before and after the change. Code that animates a delta, logs an edit history, or reacts only to a specific kind of change reads those fields.
+
+An effect receives nothing. It re-runs and observes the current state, and the framework doesn't tell it what changed or what the value was before. [classname]`EffectContext` reports only whether this is the initial run and whether the change came from another session.
+
+Keep the previous value yourself, in a second signal updated from the effect. The <<{articles}/flow/ui-state/usage-examples/realtime-dashboard#,real-time dashboard example>> shows the pattern: a `Change` record holding the previous and current values, written with [methodname]`peek()` so the effect doesn't depend on its own output. Reconstructing a list change type from before-and-after snapshots is more work, and if the code genuinely needs it, the structure is a poor fit for signals -- consider an append-only [classname]`SharedListSignal` of change records instead.
+
+
+==== No Emptiness Conditions on Lists
+
+[classname]`ListOperation` offers `ifEmpty()` and `ifNotEmpty()`. [classname]`SharedListSignal` verifies only [methodname]`verifyPosition()` and [methodname]`verifyChild()`, both of which need an existing entry to point at, so neither expresses "the list is empty". [classname]`SharedMapSignal` is better served: [methodname]`verifyHasKey()` and [methodname]`verifyKeyAbsent()` cover key presence, and [methodname]`putIfAbsent()` covers first-writer-wins initialization directly.
+
+Where `ifEmpty()` guards a one-time seeding of a list, seed it in the registry when the state is created instead. That happens once by construction, so no condition is needed.
+
+
+==== No Cluster Membership Events
+
+[interfacename]`MembershipListener` and [classname]`MembershipEvent` report nodes joining and leaving the cluster, which a custom [classname]`Backend` uses to clean up after a node that disappeared. As shared signals have no cluster, they have no membership model either. This only matters if you implemented a custom backend.
+
+
+=== What Isn't a Gap
+
+Some Collaboration Kit features look framework-specific but carry over unchanged, and it's worth not budgeting time for them:
+
+* *Avatar images from a backend.* [methodname]`AvatarGroupItem::setImageHandler` takes a [interfacename]`DownloadHandler` directly. Build the item in the mapping function and set the handler there; only the handler can't live *inside* the signal, exactly as it can't live inside [classname]`UserInfo`.
+* *Custom message submitters.* [interfacename]`CollaborationMessageSubmitter` exists so a custom component can reach the list's topic. Any code holding the list signal can call [methodname]`insertLast()`, so the interface has nothing left to do.
+* *Message configurators, Markdown, and announcements.* The first becomes ordinary code in the mapping function; the other two are [classname]`MessageList` properties and are unaffected by the migration.
+* *Writing from background threads.* Signals need no [classname]`SystemConnectionContext` and no [methodname]`ui.access()`.
+* *Conditional updates.* Transactions with `verify*()` are strictly more capable than per-operation conditions, since one transaction can carry several conditions and several changes.
+* *Read-only views of shared state.* [methodname]`asReadonly()` has no Collaboration Kit counterpart at all.
+
+
 == Feature Checklist
 
-Use this to confirm the migration covers everything before removing the Collaboration Kit dependency.
+Use this to confirm the migration covers everything before removing the Collaboration Kit dependency. *Direct* means the signals API does the same job; *Build it* means the behavior is reachable but you write it; *Missing* means there's no equivalent. <<#gaps,Gaps and Cases That Can't Be Migrated>> explains each of the last two.
 
 [cols="2,1,2", options="header"]
 |===
@@ -755,13 +897,37 @@ Use this to confirm the migration covers everything before removing the Collabor
 | Build it
 | Cleanup in the registry
 
+| Read-only shared state
+| Direct
+| [methodname]`asReadonly()`, which Collaboration Kit has no counterpart for
+
 | Automatic disconnect cleanup
 | Missing
 | Detach and session-destroy listeners, best effort
 
+| Previous value and change type
+| Missing
+| Track the previous value in a second signal
+
+| Parameterized value types
+| Missing
+| Wrap the collection in a record
+
+| List emptiness conditions
+| Missing
+| Seed in the registry instead
+
+| Cluster membership events
+| Missing
+| No equivalent
+
+| Session serialization
+| Missing
+| No equivalent; blocks Kubernetes Kit session replication
+
 | Clustering
 | Missing
-| No equivalent yet
+| No equivalent
 |===
 
 
