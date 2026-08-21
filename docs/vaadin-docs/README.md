@@ -46,7 +46,11 @@ The page was checked against the `vaadin/docs` tooling:
 * `vale --config=.vale-pr.ini articles/tools/collaboration/migrating-to-signals.adoc`
   reports 0 errors, 0 warnings, and 0 suggestions.
 * `asciidoctor -a skip-front-matter` renders it with no warnings, and every
-  internal anchor and cross-file xref target resolves.
+  internal anchor in the rendered output resolves.
+* Every cross-file xref target (`{articles}/...` and the `advanced/...` siblings)
+  was checked to exist as an `.adoc` file in a `vaadin/docs` checkout of `main`.
+  Asciidoctor run on this file alone does not expand `{articles}` or resolve
+  inter-document xrefs, so that part was verified separately.
 
 The signal APIs used in the examples were verified against
 `com.vaadin.flow.signals` in [vaadin/flow](https://github.com/vaadin/flow) and

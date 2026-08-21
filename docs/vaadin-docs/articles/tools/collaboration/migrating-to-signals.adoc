@@ -761,9 +761,9 @@ Signals have no lifecycle of their own, so both jobs move to the registry. <<#di
 
 ==== Automatic User Colors
 
-Collaboration Kit assigns each user a color index on first sight, handing out the seven available values in order, so users active at the same time reliably get distinct colors. The registry that does this lives in [classname]`CollaborationEngine`.
+Collaboration Kit assigns each user a color index on first sight, from a registry kept in [classname]`CollaborationEngine`. On the default local backend it hands out the seven available values in order of first appearance, which spreads colors better than hashing does for the first users it sees. The guarantee is weaker than it looks, though: the registry never shrinks, so the eighth distinct user to appear since startup collides with the first even if both are online, and on a non-local backend the index falls back to a hash of the user identifier.
 
-Nothing equivalent ships with signals. Hashing the user identifier, as <<#step-2-replace-userinfo,Step 2>> does, is stable and needs no coordination, but two users in the same topic can collide. Allocating indexes from the collaborator list when a user joins restores the guarantee at the cost of writing the allocator.
+Nothing equivalent ships with signals. Hashing the identifier, as <<#step-2-replace-userinfo,Step 2>> does, matches what Collaboration Kit itself falls back to, and it's stable and needs no coordination -- but two users in the same topic can collide. Allocating indexes from the current collaborator list when a user joins is the only approach that guarantees distinct colors among the users actually present, and neither product does it for you.
 
 
 ==== The Field Highlight Overlay
@@ -787,9 +787,9 @@ Smaller gaps, but each one is a place where a direct translation compiles and th
 
 ==== Parameterized Value Types
 
-Collaboration Kit accepts a Jackson [classname]`TypeReference` wherever it accepts a [classname]`Class`, which is how [methodname]`CollaborationMap::get` reads a `Set<String>` and how [methodname]`CollaborationBinder::forField` binds a [classname]`CheckboxGroup` by taking the collection type and the element type separately.
+Collaboration Kit has two ways to name a parameterized type. The topic API takes a Jackson [classname]`TypeReference` wherever it takes a [classname]`Class`, so [methodname]`CollaborationMap::get` can read a `Set<String>`. [classname]`CollaborationBinder` instead takes the two classes separately -- `forField(field, Set.class, String.class)` -- to bind a multi-select field such as a [classname]`CheckboxGroup`.
 
-Shared signals take a [classname]`Class` only. There's no [classname]`TypeReference` overload anywhere in the API, so a parameterized value type can't be expressed: `new SharedValueSignal<>(Set.class)` loses the element type, and reading it back loses the element type.
+Shared signals have neither. Every constructor and conversion takes a plain [classname]`Class`, so a parameterized value type can't be named at all: `new SharedValueSignal<>(Set.class)` has nowhere to put the element type, and reading the value back loses it.
 
 Wrap the collection in a record, which is typed all the way down and serializes as an object rather than as a bare array:
 
@@ -808,13 +808,15 @@ group.bindValue(selection.map(Selection::values),
 ----
 
 
-==== No Previous Value or Change Type
+==== No Previous Value in Effects
 
-A Collaboration Kit subscriber receives an event, and the event describes the change: [classname]`MapChangeEvent` carries the old value next to the new one, and [classname]`ListChangeEvent` adds the change type along with the previous and next keys before and after the change. Code that animates a delta, logs an edit history, or reacts only to a specific kind of change reads those fields.
+A Collaboration Kit subscriber receives an event, and the event describes the change rather than only the outcome. [classname]`MapChangeEvent` carries the old value next to the new one, and [classname]`ListChangeEvent` adds both to the surrounding keys, exposing the previous and next entry as they were before and after the change. Code that animates a delta or logs an edit history reads those fields.
 
 An effect receives nothing. It re-runs and observes the current state, and the framework doesn't tell it what changed or what the value was before. [classname]`EffectContext` reports only whether this is the initial run and whether the change came from another session.
 
-Keep the previous value yourself, in a second signal updated from the effect. The <<{articles}/flow/ui-state/usage-examples/realtime-dashboard#,real-time dashboard example>> shows the pattern: a `Change` record holding the previous and current values, written with [methodname]`peek()` so the effect doesn't depend on its own output. Reconstructing a list change type from before-and-after snapshots is more work, and if the code genuinely needs it, the structure is a poor fit for signals -- consider an append-only [classname]`SharedListSignal` of change records instead.
+Keep the previous value yourself, in a second signal updated from the effect. The <<{articles}/flow/ui-state/usage-examples/realtime-dashboard#,real-time dashboard example>> shows the pattern: a `Change` record holding the previous and current values, written with [methodname]`peek()` so the effect doesn't depend on its own output. Classifying a list change as an insert, a move, or a value change means diffing two snapshots by hand; if the code needs that, an append-only [classname]`SharedListSignal` of change records is a better fit than reconstructing the change after the fact.
+
+Collaboration Kit doesn't help here either: [classname]`ListChangeEvent` tracks a change type internally, but neither the accessor nor the enum is public, so a subscriber can't read it. The gap is the previous value and the surrounding keys, not the classification.
 
 
 ==== No Emptiness Conditions on Lists
@@ -905,7 +907,7 @@ Use this to confirm the migration covers everything before removing the Collabor
 | Missing
 | Detach and session-destroy listeners, best effort
 
-| Previous value and change type
+| Previous value in change events
 | Missing
 | Track the previous value in a second signal
 
