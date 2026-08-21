@@ -1,7 +1,7 @@
-From 70739d527032b5f3a17fe173ceefe8a0f92654f4 Mon Sep 17 00:00:00 2001
+From a4092a7dbaa89d9a867d785ce5733ffee19436f2 Mon Sep 17 00:00:00 2001
 From: "totally-not-ai[bot]"
  <290682512+totally-not-ai[bot]@users.noreply.github.com>
-Date: Fri, 21 Aug 2026 16:01:36 +0000
+Date: Fri, 21 Aug 2026 16:12:57 +0000
 Subject: [PATCH] docs: give collaborative binder users a real migration path
 
 The previous text claimed the field highlight overlay could not be reused
@@ -24,23 +24,41 @@ CollaborationBinder performs, not the component. Collaborative form editing is
 migratable today by writing more code, and flow#23868 would make it shorter
 rather than make it possible.
 ---
- .../collaboration/migrating-to-signals.adoc   | 147 +++++++++++++-----
- 1 file changed, 111 insertions(+), 36 deletions(-)
+ .../collaboration/migrating-to-signals.adoc   | 174 +++++++++++++-----
+ 1 file changed, 131 insertions(+), 43 deletions(-)
 
 diff --git a/articles/tools/collaboration/migrating-to-signals.adoc b/articles/tools/collaboration/migrating-to-signals.adoc
-index 4e90311..517a4a1 100644
+index 4e90311..f9d6223 100644
 --- a/articles/tools/collaboration/migrating-to-signals.adoc
 +++ b/articles/tools/collaboration/migrating-to-signals.adoc
-@@ -115,7 +115,7 @@ Collaboration Kit and signals can run side by side in the same application, and
+@@ -114,8 +114,8 @@ Collaboration Kit and signals can run side by side in the same application, and
+ | Validation stays in [classname]`Binder`; synchronization moves to signals.
  
  | [classname]`FormManager`
- | A shared signal for values, another for editors
+-| A shared signal for values, another for editors
 -| Highlighting is a CSS binding.
++| A shared signal for values, a list signal of editors
 +| The highlight component is driven directly.
  
  | [classname]`CollaborationAvatarGroup`
  | [classname]`AvatarGroup` with [methodname]`bindItems()`
-@@ -455,44 +455,125 @@ save.addClickListener(event -> personService.save(form.peek()));
+@@ -158,13 +158,13 @@ Group the signals that belong to one topic in a record, so that a view resolves
+ ----
+ public record DocumentState(
+         SharedValueSignal<PersonForm> form,
+-        SharedMapSignal<Collaborator> editors,
++        SharedListSignal<FieldEditor> editors,
+         SharedListSignal<Collaborator> collaborators,
+         SharedListSignal<ChatMessage> messages) {
+ 
+     static DocumentState create(PersonForm initialValue) {
+         return new DocumentState(new SharedValueSignal<>(initialValue),
+-                new SharedMapSignal<>(Collaborator.class),
++                new SharedListSignal<>(FieldEditor.class),
+                 new SharedListSignal<>(Collaborator.class),
+                 new SharedListSignal<>(ChatMessage.class));
+     }
+@@ -455,44 +455,141 @@ save.addClickListener(event -> personService.save(form.peek()));
  [[step-5-field-highlighting]]
  == Step 5: Field Highlighting
  
@@ -49,6 +67,10 @@ index 4e90311..517a4a1 100644
  
 -Track who's editing which property in a map keyed by property name:
 +There are three parts: shared state describing who is editing what, reporting the local user's focus into that state, and pushing the remote editors to each field.
++
++.Highlighting Without a Binder
++[TIP]
++[classname]`FormManager` exists so that custom components can participate in highlighting without a [classname]`CollaborationBinder`. With signals, there's nothing to participate in -- any code holding the `editors` signal can read and write it.
 +
 +
 +=== Shared Editor State
@@ -67,27 +89,39 @@ index 4e90311..517a4a1 100644
 +
 +=== Enabling the Component
 +
-+Add the dependency that carries the npm package. The version comes from the Vaadin BOM, so don't declare one:
++The Java artifact, `vaadin-field-highlighter-flow`, is already on the classpath: `vaadin-core` depends on it. Collaboration Kit declares it as `provided`, so removing Collaboration Kit doesn't take it away.
 +
-+[source,xml]
++What removing Collaboration Kit does take away is the *frontend* module. The `@NpmPackage` and `@JsModule` annotations for `@vaadin/field-highlighter` sit on [classname]`FieldHighlighterInitializer`, and Flow's production build only includes frontend resources declared on classes your code actually reaches. Collaboration Kit reached that class; once it's gone, nothing does. A call to [methodname]`executeJs` referring to the custom element by name isn't a reference Flow can see, so the module is left out of the production bundle. The failure is delayed and confusing -- development mode works, because the module is in the default bundle, and `customElements.get('vaadin-field-highlighter')` is `undefined` only in production.
++
++Reach the class the same way Collaboration Kit does, by extending it:
+ 
+ [source,java]
+ ----
+-SharedMapSignal<Collaborator> editors = state.editors();
++public class FieldHighlighting extends FieldHighlighterInitializer {
+ 
+-firstName.addFocusListener(event -> editors.put("firstName", localUser));
+-firstName.addBlurListener(event -> Signal.runInTransaction(() -> {
+-    SharedValueSignal<Collaborator> entry = editors.get().get("firstName");
+-    if (entry != null) {
+-        // Clear the entry only while it still belongs to this user
+-        entry.verifyValue(localUser);
+-        editors.remove("firstName");
++    public static Registration enable(HasValue<?, ?> field) {
++        return init(((HasElement) field).getElement());
+     }
+-}));
++}
 +----
-+<dependency>
-+    <groupId>com.vaadin</groupId>
-+    <artifactId>vaadin-field-highlighter-flow</artifactId>
-+</dependency>
-+----
 +
-+This is the same artifact Collaboration Kit depends on, so an application migrating away from Collaboration Kit already has it on the classpath.
-+
-+Initialize the highlighter once per field. The same call installs the observer that reports focus:
++[methodname]`init()` is `protected static`, so a subclass can call it. Using it in place of a hand-written [methodname]`executeJs` call matters for a second reason: it runs the initialization on every attach, not once. A field that's detached and re-attached -- a `@PreserveOnRefresh` view surviving a reload, a cached view, a field moved between layouts -- comes back as a fresh client-side element without the focus observer, and a one-shot call would leave that user's focus silently unreported from then on.
 +
 +[source,java]
 +----
-+Element element = firstName.getElement();
-+element.executeJs(
-+        "customElements.get('vaadin-field-highlighter').init(this)");
-+----
-+
++FieldHighlighting.enable(firstName);
+ ----
+ 
+-Then bind the field's appearance to that entry, ignoring the local user's own focus:
 +
 +=== Reporting Local Focus
 +
@@ -95,42 +129,43 @@ index 4e90311..517a4a1 100644
  
  [source,java]
  ----
--SharedMapSignal<Collaborator> editors = state.editors();
-+AtomicReference<SharedValueSignal<FieldEditor>> own = new AtomicReference<>();
- 
--firstName.addFocusListener(event -> editors.put("firstName", localUser));
--firstName.addBlurListener(event -> Signal.runInTransaction(() -> {
--    SharedValueSignal<Collaborator> entry = editors.get().get("firstName");
+-Signal<Collaborator> editor = editors.map(entries -> {
+-    SharedValueSignal<Collaborator> entry = entries.get("firstName");
+-    return entry != null ? entry.get() : null;
++Element element = firstName.getElement();
++
 +element.addEventListener("vaadin-highlight-show", event -> {
 +    int fieldIndex = event.getEventData().at("/event.detail/fieldIndex")
 +            .asInt(0);
-+    own.set(editors.insertLast(new FieldEditor("firstName", localUser.id(),
-+            localUser.name(), localUser.colorIndex(), fieldIndex)).signal());
++    editors.insertLast(new FieldEditor("firstName", localUser.id(),
++            localUser.name(), localUser.colorIndex(), fieldIndex));
 +}).addEventData("event.detail");
 +
-+element.addEventListener("vaadin-highlight-hide", event -> {
-+    SharedValueSignal<FieldEditor> entry = own.getAndSet(null);
-     if (entry != null) {
--        // Clear the entry only while it still belongs to this user
--        entry.verifyValue(localUser);
--        editors.remove("firstName");
-+        editors.remove(entry);
-     }
--}));
-+});
- ----
- 
--Then bind the field's appearance to that entry, ignoring the local user's own focus:
++element.addEventListener("vaadin-highlight-hide",
++        event -> clearEditor(editors, "firstName", localUser.id()));
++----
++
++Remove by matching the property and the user rather than by remembering the signal returned when the entry was inserted. Two `vaadin-highlight-show` events can arrive without a hide between them -- moving between the date and time parts of a [classname]`DateTimePicker` is exactly that case -- and a single remembered handle would lose the earlier entry, leaving a highlight on the field that nobody can clear. Collaboration Kit sweeps every entry matching the user and the property for the same reason:
++
++[source,java]
++----
++static void clearEditor(SharedListSignal<FieldEditor> editors, String property,
++        String userId) {
++    Signal.runInTransaction(() -> editors.get().stream().filter(entry -> {
++        FieldEditor editor = entry.get();
++        return editor.property().equals(property)
++                && editor.userId().equals(userId);
++    }).toList().forEach(editors::remove));
++}
++----
++
 +
 +=== Pushing Remote Editors
 +
 +An effect sends the current editors of the field to the component whenever the shared list changes. Filter out the local user, the same way [classname]`CollaborationBinder` does -- you highlight other people's focus, not your own:
- 
- [source,java]
- ----
--Signal<Collaborator> editor = editors.map(entries -> {
--    SharedValueSignal<Collaborator> entry = entries.get("firstName");
--    return entry != null ? entry.get() : null;
++
++[source,java]
++----
 +private static final ObjectMapper MAPPER = new ObjectMapper();
 +
 +record HighlightUser(String id, String name, int colorIndex, int fieldIndex) {
@@ -158,7 +193,7 @@ index 4e90311..517a4a1 100644
 +
 +.Clean Up on Detach
 +[IMPORTANT]
-+Editor entries need the same cleanup as presence entries. A user who navigates away while a field is focused gets no `vaadin-highlight-hide`, so remove any remaining entries for the local user in a detach listener.
++Editor entries need the same cleanup as presence entries. A user who navigates away while a field is focused gets no `vaadin-highlight-hide`, so call [methodname]`clearEditor()` for the local user in a detach listener.
 +
 +For a form with more than a couple of fields, wrap the three parts in one helper that takes the field, the property name, and the shared list, and call it per binding.
 +
@@ -188,7 +223,7 @@ index 4e90311..517a4a1 100644
                  : "transparent"));
  ----
  
-@@ -504,17 +585,10 @@ vaadin-text-field.being-edited {
+@@ -504,16 +601,6 @@ vaadin-text-field.being-edited {
  }
  ----
  
@@ -198,15 +233,14 @@ index 4e90311..517a4a1 100644
 -
 -A map keyed by property name records one editor per field, which is enough for most forms. To show every user editing a field at once, as Collaboration Kit does, store a [classname]`SharedListSignal` of collaborators per property instead -- each user then adds and removes only their own entry, and the clobbering problem disappears.
 -
- .Highlighting Without a Binder
- [TIP]
- [classname]`FormManager` exists so that custom components can participate in highlighting without a [classname]`CollaborationBinder`. With signals, there's nothing to participate in -- any code holding the `editors` signal can read and write it.
- 
+-.Highlighting Without a Binder
+-[TIP]
+-[classname]`FormManager` exists so that custom components can participate in highlighting without a [classname]`CollaborationBinder`. With signals, there's nothing to participate in -- any code holding the `editors` signal can read and write it.
 -
+ 
  == Step 6: Chat and Messages
  
- A chat is a list signal of message records plus two component bindings. Note that [classname]`MessageListItem` isn't stored in the signal; it's created when rendering, so the shared value stays a plain record:
-@@ -748,7 +822,7 @@ If the application serializes sessions, keep Collaboration Kit for now.
+@@ -748,7 +835,7 @@ If the application serializes sessions, keep Collaboration Kit for now.
  
  === Behavior You Have to Rebuild
  
@@ -215,7 +249,7 @@ index 4e90311..517a4a1 100644
  
  
  ==== Cleanup When a User Disconnects
-@@ -774,15 +848,15 @@ Collaboration Kit assigns each user a color index on first sight, from a registr
+@@ -774,15 +861,15 @@ Collaboration Kit assigns each user a color index on first sight, from a registr
  Nothing equivalent ships with signals. Hashing the identifier, as <<#step-2-replace-userinfo,Step 2>> does, matches what Collaboration Kit itself falls back to, and it's stable and needs no coordination -- but two users in the same topic can collide. Allocating indexes from the current collaborator list when a user joins is the only approach that guarantees distinct colors among the users actually present, and neither product does it for you.
  
  
@@ -235,7 +269,7 @@ index 4e90311..517a4a1 100644
  
  
  ==== The Message Persistence Protocol
-@@ -866,6 +940,7 @@ Some Collaboration Kit features look framework-specific but carry over unchanged
+@@ -866,6 +953,7 @@ Some Collaboration Kit features look framework-specific but carry over unchanged
  * *Message configurators, Markdown, and announcements.* The first becomes ordinary code in the mapping function; the other two are [classname]`MessageList` properties and are unaffected by the migration.
  * *Writing from background threads.* Signals need no [classname]`SystemConnectionContext` and no [methodname]`ui.access()`.
  * *Conditional updates.* Transactions with `verify*()` are strictly more capable than per-operation conditions, since one transaction can carry several conditions and several changes.
@@ -243,7 +277,7 @@ index 4e90311..517a4a1 100644
  * *Read-only views of shared state.* [methodname]`asReadonly()` has no Collaboration Kit counterpart at all.
  
  
-@@ -915,7 +990,7 @@ Use this to confirm the migration covers everything before removing the Collabor
+@@ -915,7 +1003,7 @@ Use this to confirm the migration covers everything before removing the Collabor
  
  | Field highlighting
  | Build it

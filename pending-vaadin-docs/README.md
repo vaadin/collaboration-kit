@@ -18,6 +18,13 @@ documented static JavaScript API, and Collaboration Kit drives it purely
 through `Element::executeJs`, so application code can do the same and get an
 identical result.
 
+The recipe follows Collaboration Kit's own structure rather than reinventing it:
+a subclass of `FieldHighlighterInitializer`, which both keeps the frontend
+module in the production bundle and re-initializes on every attach; the
+`vaadin-highlight-show` and `vaadin-highlight-hide` events for local focus, so
+composite fields report the right sub-field; and removal by matching property
+and user, so a second show event cannot orphan an entry.
+
 ## Applying it
 
 ```sh
