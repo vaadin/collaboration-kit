@@ -27,7 +27,12 @@ import tools.jackson.databind.node.NullNode;
  *
  * @author Vaadin Ltd
  * @since 1.0
+ *
+ * @deprecated Collaboration Kit is superseded by Vaadin Signals. Deprecated as
+ *             of Vaadin 25.3 and to be removed in Vaadin 26.0. Use shared
+ *             signals from {@link com.vaadin.signals.SignalFactory} instead.
  */
+@Deprecated(since = "25.3", forRemoval = true)
 public class CollaborationBinderUtil {
 
     static final String COLLABORATION_BINDER_MAP_NAME = FormManager.class
