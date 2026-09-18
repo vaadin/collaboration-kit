@@ -72,7 +72,7 @@ import tools.jackson.databind.node.ObjectNode;
  *             {@link com.vaadin.signals.SignalFactory} to get shared signals
  *             instead of opening topic connections.
  */
-@Deprecated(since = "7.1", forRemoval = true)
+@Deprecated(since = "25.3", forRemoval = true)
 public class CollaborationEngine {
 
     private static class TopicAndEventLog {

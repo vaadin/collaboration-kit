@@ -48,7 +48,7 @@ import com.vaadin.flow.shared.Registration;
  *             of Vaadin 25.3 and to be removed in Vaadin 26.0. Use shared
  *             signals from {@link com.vaadin.signals.SignalFactory} instead.
  */
-@Deprecated(since = "7.1", forRemoval = true)
+@Deprecated(since = "25.3", forRemoval = true)
 public class MessageManager extends AbstractCollaborationManager {
 
     static {

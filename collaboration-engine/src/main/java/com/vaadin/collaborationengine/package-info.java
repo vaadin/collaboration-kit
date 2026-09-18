@@ -25,5 +25,5 @@
  * are only reachable through one of them are not, so that application code gets
  * one warning per feature to migrate instead of one per declaration.
  */
-@Deprecated(since = "7.1", forRemoval = true)
+@Deprecated(since = "25.3", forRemoval = true)
 package com.vaadin.collaborationengine;

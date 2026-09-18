@@ -34,6 +34,13 @@ import org.junit.Test;
 public class DeprecatedEntryPointsTest {
 
     /**
+     * The version the deprecation announces itself with. Collaboration Kit is
+     * released as part of the platform, so the version users recognize is the
+     * platform one rather than the version of this artifact.
+     */
+    private static final String DEPRECATED_SINCE = "25.3";
+
+    /**
      * Types that application code has to name in order to start using a
      * Collaboration Kit feature.
      */
@@ -68,9 +75,9 @@ public class DeprecatedEntryPointsTest {
                     entryPoint.getSimpleName()
                             + " should be deprecated for removal",
                     deprecated.forRemoval());
-            Assert.assertFalse(entryPoint.getSimpleName()
+            Assert.assertEquals(entryPoint.getSimpleName()
                     + " should tell since which version it is deprecated",
-                    deprecated.since().isEmpty());
+                    DEPRECATED_SINCE, deprecated.since());
         }
     }
 
@@ -95,5 +102,9 @@ public class DeprecatedEntryPointsTest {
         Assert.assertTrue(
                 "The collaborationengine package should be deprecated for removal",
                 deprecated.forRemoval());
+        Assert.assertEquals(
+                "The collaborationengine package should be deprecated since the"
+                        + " same version as its entry points",
+                DEPRECATED_SINCE, deprecated.since());
     }
 }
