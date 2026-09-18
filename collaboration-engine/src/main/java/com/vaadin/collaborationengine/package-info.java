@@ -16,13 +16,14 @@
 /**
  * Collaboration Kit, an API for building real-time collaborative features into
  * Vaadin applications.
- *
- * @deprecated Collaboration Kit is superseded by Vaadin Signals. Deprecated as
- *             of Vaadin 25.3 and to be removed in Vaadin 26.0. Use shared
- *             signals from {@link com.vaadin.signals.SignalFactory} instead.
- *             The entry points of this package are deprecated individually; the
- *             types that are only reachable through them are not, so that
- *             application code gets one warning per feature to migrate.
+ * <p>
+ * This package is superseded by Vaadin Signals. It is deprecated as of Vaadin
+ * 25.3 and will be removed in Vaadin 26.0. Use shared signals from
+ * {@link com.vaadin.signals.SignalFactory} instead.
+ * <p>
+ * The entry points of this package are deprecated individually. The types that
+ * are only reachable through one of them are not, so that application code gets
+ * one warning per feature to migrate instead of one per declaration.
  */
 @Deprecated(since = "7.1", forRemoval = true)
 package com.vaadin.collaborationengine;
