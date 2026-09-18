@@ -42,7 +42,12 @@ import com.vaadin.flow.shared.Registration;
  *
  * @author Vaadin Ltd
  * @since 3.1
+ *
+ * @deprecated Collaboration Kit is superseded by Vaadin Signals. Deprecated as
+ *             of Vaadin 25.3 and to be removed in Vaadin 26.0. Use shared
+ *             signals from {@link com.vaadin.signals.SignalFactory} instead.
  */
+@Deprecated(since = "7.1", forRemoval = true)
 public class CollaborationMessageInput extends Composite<MessageInput>
         implements Focusable<CollaborationMessageInput>, HasSize, HasStyle,
         HasEnabled, HasTooltip, HasThemeVariant<MessageInputVariant> {

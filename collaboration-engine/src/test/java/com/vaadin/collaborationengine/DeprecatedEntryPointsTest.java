@@ -84,4 +84,16 @@ public class DeprecatedEntryPointsTest {
                     supportingType.getAnnotation(Deprecated.class));
         }
     }
+
+    @Test
+    public void package_deprecatedForRemoval() {
+        Deprecated deprecated = CollaborationEngine.class.getPackage()
+                .getAnnotation(Deprecated.class);
+        Assert.assertNotNull(
+                "The collaborationengine package should be deprecated",
+                deprecated);
+        Assert.assertTrue(
+                "The collaborationengine package should be deprecated for removal",
+                deprecated.forRemoval());
+    }
 }
