@@ -18,8 +18,7 @@
  * Vaadin applications.
  * <p>
  * This package is superseded by Vaadin Signals. It is deprecated as of Vaadin
- * 25.3 and will be removed in Vaadin 26.0. Use shared signals from
- * {@link com.vaadin.signals.SignalFactory} instead.
+ * 25.3 and will be removed in Vaadin 26.0. Use shared signals instead.
  * <p>
  * The entry points of this package are deprecated individually. The types that
  * are only reachable through one of them are not, so that application code gets
