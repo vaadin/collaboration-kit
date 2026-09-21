@@ -448,9 +448,14 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      * Wrapper method for {@link MessageList#setTypingUsers(List)}. Sets the
      * users who are currently typing a message, for whom a typing indicator is
      * displayed at the end of the list.
+     * <p>
+     * This API is experimental and requires the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
      *
      * @param typingUsers
      *            the users who are currently typing, not {@code null}
+     * @since 7.1
      */
     public void setTypingUsers(List<MessageListUser> typingUsers) {
         this.getContent().setTypingUsers(typingUsers);
@@ -461,9 +466,14 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      * {@link MessageList#setTypingUsers(MessageListUser...)}. Sets the users
      * who are currently typing a message, for whom a typing indicator is
      * displayed at the end of the list.
+     * <p>
+     * This API is experimental and requires the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
      *
      * @param typingUsers
      *            the users who are currently typing, not {@code null}
+     * @since 7.1
      */
     public void setTypingUsers(MessageListUser... typingUsers) {
         this.getContent().setTypingUsers(typingUsers);
@@ -474,6 +484,7 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      * who are currently typing a message.
      *
      * @return the users who are currently typing
+     * @since 7.1
      */
     public List<MessageListUser> getTypingUsers() {
         return this.getContent().getTypingUsers();
@@ -482,6 +493,10 @@ public class CollaborationMessageList extends Composite<MessageList> implements
     /**
      * Wrapper method for {@link MessageList#bindTypingUsers(Signal)}. Binds the
      * users who are currently typing a message to the given signal.
+     * <p>
+     * This API is experimental and requires the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
      *
      * @param typingUsers
      *            the signal with the users who are currently typing, not
@@ -489,6 +504,7 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      * @param <S>
      *            the type of the signals in the bound list
      * @return the signal binding
+     * @since 7.1
      */
     public <S extends Signal<MessageListUser>> SignalBinding<List<MessageListUser>> bindTypingUsers(
             Signal<List<S>> typingUsers) {
@@ -499,9 +515,14 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      * Wrapper method for
      * {@link MessageList#setTypingIndicatorType(MessageListTypingIndicatorType)}.
      * Sets how the typing indicator is displayed.
+     * <p>
+     * This API is experimental and requires the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
      *
      * @param typingIndicatorType
      *            the type of the typing indicator, not {@code null}
+     * @since 7.1
      */
     public void setTypingIndicatorType(
             MessageListTypingIndicatorType typingIndicatorType) {
@@ -513,6 +534,7 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      * the typing indicator is displayed.
      *
      * @return the type of the typing indicator
+     * @since 7.1
      */
     public MessageListTypingIndicatorType getTypingIndicatorType() {
         return this.getContent().getTypingIndicatorType();
@@ -521,9 +543,14 @@ public class CollaborationMessageList extends Composite<MessageList> implements
     /**
      * Wrapper method for {@link MessageList#setI18n(MessageListI18n)}. Sets the
      * internationalization properties for this component.
+     * <p>
+     * This API is experimental and requires the
+     * {@code com.vaadin.experimental.messageListTypingIndicator} or
+     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
      *
      * @param i18n
      *            the internationalized properties, not {@code null}
+     * @since 7.1
      */
     public void setI18n(MessageListI18n i18n) {
         this.getContent().setI18n(i18n);
@@ -535,6 +562,7 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      *
      * @return the i18n object, or {@code null} if the i18n properties haven't
      *         been set
+     * @since 7.1
      */
     public MessageListI18n getI18n() {
         return this.getContent().getI18n();
@@ -549,6 +577,7 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      * @param listener
      *            the listener to add, not {@code null}
      * @return a registration for removing the listener
+     * @since 7.1
      */
     public Registration addAttachmentClickListener(
             ComponentEventListener<MessageList.AttachmentClickEvent> listener) {
