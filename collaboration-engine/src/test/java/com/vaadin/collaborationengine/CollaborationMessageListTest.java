@@ -39,13 +39,11 @@ import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.ReflectionUtils;
 import com.vaadin.collaborationengine.util.TestStreamResource;
 import com.vaadin.collaborationengine.util.TestUtils;
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListI18n;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.component.messages.MessageListTypingIndicatorFeatureFlagProvider;
 import com.vaadin.flow.component.messages.MessageListTypingIndicatorType;
 import com.vaadin.flow.component.messages.MessageListUser;
 import com.vaadin.flow.component.messages.MessageListVariant;
@@ -703,13 +701,6 @@ public class CollaborationMessageListTest {
 
     @Test
     public void bindTypingUsers_bindingIsActiveOnMessageList() {
-        // The typing indicator is an experimental component feature, which
-        // needs to be enabled in the context resolved from the UI
-        FeatureFlags.get(client1.ui.getSession().getService().getContext())
-                .setEnabled(
-                        MessageListTypingIndicatorFeatureFlagProvider.FEATURE_FLAG_ID,
-                        true);
-        client1.attach();
         ListSignal<MessageListUser> typingUsers = new ListSignal<>();
         typingUsers.insertLast(new MessageListUser("name1"));
 
