@@ -211,7 +211,20 @@ public class CollaborationMessageListTest {
     }
 
     private static List<String> blackListedMethods = Arrays.asList("getItems",
-            "setItems", "addItem", "localeChange");
+            "setItems", "addItem", "bindItems", "localeChange");
+
+    // Message list APIs which are not wrapped yet: the typing indicator,
+    // which is an experimental component feature, the message attachments
+    // and the theming
+    private static List<String> notWrappedMethods = Arrays.asList(
+            "setTypingUsers", "getTypingUsers", "bindTypingUsers",
+            "setTypingIndicatorType", "getTypingIndicatorType", "setI18n",
+            "getI18n", "addAttachmentClickListener", "setThemeVariant",
+            "setThemeVariants", "addThemeVariants", "removeThemeVariants",
+            "bindThemeVariant", "bindThemeVariants", "setThemeName",
+            "getThemeName", "addThemeName", "removeThemeName", "hasThemeName",
+            "getThemeNames", "addThemeNames", "removeThemeNames",
+            "bindThemeName", "bindThemeNames");
 
     @Test
     public void messageList_replicateRelevantAPIs() {
@@ -222,6 +235,7 @@ public class CollaborationMessageListTest {
 
         List<String> missingMethods = messageListMethods.stream()
                 .filter(m -> !blackListedMethods.contains(m)
+                        && !notWrappedMethods.contains(m)
                         && !collaborationMessageListMethods.contains(m))
                 .collect(Collectors.toList());
 
@@ -674,4 +688,5 @@ public class CollaborationMessageListTest {
         Assert.assertTrue(
                 client1.messageList.getContent().isAnnounceMessages());
     }
+
 }
