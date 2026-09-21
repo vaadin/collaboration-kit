@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.collaborationengine.util.AbstractCollaborativeViewTest;
-import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.testbench.TestBenchElement;
 
 public class CollaborationAvatarInDialogTestCommon
@@ -36,8 +35,10 @@ public class CollaborationAvatarInDialogTestCommon
         waitUntil(driver -> !users.findElements(By.tagName("div")).isEmpty(),
                 3);
 
-        DialogElement dialogElement = $(DialogElement.class).first();
-        dialogElement.setProperty("opened", false);
+        // The dialog is closed through its own close button, as setting the
+        // opened property on the client is no longer synchronized to the
+        // server.
+        $("vaadin-button").id("close").click();
         waitUntil(driver -> users.findElements(By.tagName("div")).isEmpty(), 3);
     }
 

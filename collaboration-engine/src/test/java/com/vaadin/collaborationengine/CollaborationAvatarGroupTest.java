@@ -338,7 +338,7 @@ public class CollaborationAvatarGroupTest {
     }
 
     private static List<String> blackListedMethods = Arrays.asList("setItems",
-            "getItems", "add", "remove");
+            "getItems", "bindItems", "add", "remove");
 
     @Test
     public void avatarGroup_replicateRelevantAPIs() {
