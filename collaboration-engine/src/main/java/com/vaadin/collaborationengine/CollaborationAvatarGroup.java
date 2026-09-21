@@ -44,7 +44,12 @@ import com.vaadin.flow.server.streams.DownloadHandler;
  *
  * @author Vaadin Ltd
  * @since 1.0
+ *
+ * @deprecated Collaboration Kit is superseded by Vaadin Signals. Deprecated as
+ *             of Vaadin 25.3 and to be removed in Vaadin 26.0. Use shared
+ *             signals instead.
  */
+@Deprecated(since = "25.3", forRemoval = true)
 public class CollaborationAvatarGroup extends Composite<AvatarGroup> implements
         HasSize, HasStyle, HasTheme, HasThemeVariant<AvatarGroupVariant> {
 

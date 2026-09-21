@@ -67,7 +67,12 @@ import tools.jackson.databind.node.NullNode;
  *
  * @param <BEAN>
  *            the bean type
+ *
+ * @deprecated Collaboration Kit is superseded by Vaadin Signals. Deprecated as
+ *             of Vaadin 25.3 and to be removed in Vaadin 26.0. Use shared
+ *             signals instead.
  */
+@Deprecated(since = "25.3", forRemoval = true)
 public class CollaborationBinder<BEAN> extends Binder<BEAN>
         implements HasExpirationTimeout {
 

@@ -66,7 +66,12 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * @author Vaadin Ltd
  * @since 1.0
+ *
+ * @deprecated Collaboration Kit is superseded by Vaadin Signals. Deprecated as
+ *             of Vaadin 25.3 and to be removed in Vaadin 26.0. Use shared
+ *             signals instead of opening topic connections.
  */
+@Deprecated(since = "25.3", forRemoval = true)
 public class CollaborationEngine {
 
     private static class TopicAndEventLog {
