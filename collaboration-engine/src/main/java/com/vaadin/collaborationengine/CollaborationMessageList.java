@@ -22,23 +22,14 @@ import java.util.stream.Collectors;
 
 import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageHandler;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageProvider;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.messages.MessageListI18n;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.component.messages.MessageListTypingIndicatorType;
-import com.vaadin.flow.component.messages.MessageListUser;
-import com.vaadin.flow.component.messages.MessageListVariant;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
-import com.vaadin.flow.signals.Signal;
 
 /**
  * Extension of the {@link MessageList} component which integrates with the
@@ -50,8 +41,8 @@ import com.vaadin.flow.signals.Signal;
  * @author Vaadin Ltd
  * @since 3.1
  */
-public class CollaborationMessageList extends Composite<MessageList> implements
-        HasSize, HasStyle, HasTheme, HasThemeVariant<MessageListVariant> {
+public class CollaborationMessageList extends Composite<MessageList>
+        implements HasSize, HasStyle {
 
     /**
      * Configurator callback for messages in a {@link CollaborationMessageList}.
@@ -442,146 +433,6 @@ public class CollaborationMessageList extends Composite<MessageList> implements
      */
     public boolean isAnnounceMessages() {
         return this.getContent().isAnnounceMessages();
-    }
-
-    /**
-     * Wrapper method for {@link MessageList#setTypingUsers(List)}. Sets the
-     * users who are currently typing a message, for whom a typing indicator is
-     * displayed at the end of the list.
-     * <p>
-     * This API is experimental and requires the
-     * {@code com.vaadin.experimental.messageListTypingIndicator} or
-     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
-     *
-     * @param typingUsers
-     *            the users who are currently typing, not {@code null}
-     * @since 7.1
-     */
-    public void setTypingUsers(List<MessageListUser> typingUsers) {
-        this.getContent().setTypingUsers(typingUsers);
-    }
-
-    /**
-     * Wrapper method for
-     * {@link MessageList#setTypingUsers(MessageListUser...)}. Sets the users
-     * who are currently typing a message, for whom a typing indicator is
-     * displayed at the end of the list.
-     * <p>
-     * This API is experimental and requires the
-     * {@code com.vaadin.experimental.messageListTypingIndicator} or
-     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
-     *
-     * @param typingUsers
-     *            the users who are currently typing, not {@code null}
-     * @since 7.1
-     */
-    public void setTypingUsers(MessageListUser... typingUsers) {
-        this.getContent().setTypingUsers(typingUsers);
-    }
-
-    /**
-     * Wrapper method for {@link MessageList#getTypingUsers()}. Gets the users
-     * who are currently typing a message.
-     *
-     * @return the users who are currently typing
-     * @since 7.1
-     */
-    public List<MessageListUser> getTypingUsers() {
-        return this.getContent().getTypingUsers();
-    }
-
-    /**
-     * Wrapper method for {@link MessageList#bindTypingUsers(Signal)}. Binds the
-     * users who are currently typing a message to the given signal.
-     * <p>
-     * This API is experimental and requires the
-     * {@code com.vaadin.experimental.messageListTypingIndicator} or
-     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
-     *
-     * @param typingUsers
-     *            the signal with the users who are currently typing, not
-     *            {@code null}
-     * @param <S>
-     *            the type of the signals in the bound list
-     * @return the signal binding
-     * @since 7.1
-     */
-    public <S extends Signal<MessageListUser>> SignalBinding<List<MessageListUser>> bindTypingUsers(
-            Signal<List<S>> typingUsers) {
-        return this.getContent().bindTypingUsers(typingUsers);
-    }
-
-    /**
-     * Wrapper method for
-     * {@link MessageList#setTypingIndicatorType(MessageListTypingIndicatorType)}.
-     * Sets how the typing indicator is displayed.
-     * <p>
-     * This API is experimental and requires the
-     * {@code com.vaadin.experimental.messageListTypingIndicator} or
-     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
-     *
-     * @param typingIndicatorType
-     *            the type of the typing indicator, not {@code null}
-     * @since 7.1
-     */
-    public void setTypingIndicatorType(
-            MessageListTypingIndicatorType typingIndicatorType) {
-        this.getContent().setTypingIndicatorType(typingIndicatorType);
-    }
-
-    /**
-     * Wrapper method for {@link MessageList#getTypingIndicatorType()}. Gets how
-     * the typing indicator is displayed.
-     *
-     * @return the type of the typing indicator
-     * @since 7.1
-     */
-    public MessageListTypingIndicatorType getTypingIndicatorType() {
-        return this.getContent().getTypingIndicatorType();
-    }
-
-    /**
-     * Wrapper method for {@link MessageList#setI18n(MessageListI18n)}. Sets the
-     * internationalization properties for this component.
-     * <p>
-     * This API is experimental and requires the
-     * {@code com.vaadin.experimental.messageListTypingIndicator} or
-     * {@code com.vaadin.experimental.aiComponents} feature flag to be enabled.
-     *
-     * @param i18n
-     *            the internationalized properties, not {@code null}
-     * @since 7.1
-     */
-    public void setI18n(MessageListI18n i18n) {
-        this.getContent().setI18n(i18n);
-    }
-
-    /**
-     * Wrapper method for {@link MessageList#getI18n()}. Gets the
-     * internationalization object previously set for this component.
-     *
-     * @return the i18n object, or {@code null} if the i18n properties haven't
-     *         been set
-     * @since 7.1
-     */
-    public MessageListI18n getI18n() {
-        return this.getContent().getI18n();
-    }
-
-    /**
-     * Wrapper method for
-     * {@link MessageList#addAttachmentClickListener(ComponentEventListener)}.
-     * Adds a listener which is notified when the user clicks an attachment of a
-     * message.
-     *
-     * @param listener
-     *            the listener to add, not {@code null}
-     * @return a registration for removing the listener
-     * @since 7.1
-     */
-    public Registration addAttachmentClickListener(
-            ComponentEventListener<MessageList.AttachmentClickEvent> listener) {
-        return this.getContent().addAttachmentClickListener(listener);
     }
 
     private void refreshMessages() {

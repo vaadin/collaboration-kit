@@ -39,19 +39,12 @@ import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.ReflectionUtils;
 import com.vaadin.collaborationengine.util.TestStreamResource;
 import com.vaadin.collaborationengine.util.TestUtils;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
-import com.vaadin.flow.component.messages.MessageListI18n;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.component.messages.MessageListTypingIndicatorType;
-import com.vaadin.flow.component.messages.MessageListUser;
-import com.vaadin.flow.component.messages.MessageListVariant;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.signals.BindingActiveException;
-import com.vaadin.flow.signals.local.ListSignal;
 
 public class CollaborationMessageListTest {
 
@@ -220,6 +213,19 @@ public class CollaborationMessageListTest {
     private static List<String> blackListedMethods = Arrays.asList("getItems",
             "setItems", "addItem", "bindItems", "localeChange");
 
+    // Message list APIs which are not wrapped yet: the typing indicator,
+    // which is an experimental component feature, the message attachments
+    // and the theming
+    private static List<String> notWrappedMethods = Arrays.asList(
+            "setTypingUsers", "getTypingUsers", "bindTypingUsers",
+            "setTypingIndicatorType", "getTypingIndicatorType", "setI18n",
+            "getI18n", "addAttachmentClickListener", "setThemeVariant",
+            "setThemeVariants", "addThemeVariants", "removeThemeVariants",
+            "bindThemeVariant", "bindThemeVariants", "setThemeName",
+            "getThemeName", "addThemeName", "removeThemeName", "hasThemeName",
+            "getThemeNames", "addThemeNames", "removeThemeNames",
+            "bindThemeName", "bindThemeNames");
+
     @Test
     public void messageList_replicateRelevantAPIs() {
         List<String> messageListMethods = ReflectionUtils
@@ -229,6 +235,7 @@ public class CollaborationMessageListTest {
 
         List<String> missingMethods = messageListMethods.stream()
                 .filter(m -> !blackListedMethods.contains(m)
+                        && !notWrappedMethods.contains(m)
                         && !collaborationMessageListMethods.contains(m))
                 .collect(Collectors.toList());
 
@@ -682,75 +689,4 @@ public class CollaborationMessageListTest {
                 client1.messageList.getContent().isAnnounceMessages());
     }
 
-    @Test
-    public void setTypingUsers_typingUsersArePassedToMessageList() {
-        MessageListUser user1 = new MessageListUser("name1");
-        client1.messageList.setTypingUsers(user1);
-        Assert.assertEquals(Collections.singletonList(user1),
-                client1.messageList.getTypingUsers());
-        Assert.assertEquals(Collections.singletonList(user1),
-                client1.messageList.getContent().getTypingUsers());
-
-        MessageListUser user2 = new MessageListUser("name2");
-        client1.messageList.setTypingUsers(Collections.singletonList(user2));
-        Assert.assertEquals(Collections.singletonList(user2),
-                client1.messageList.getTypingUsers());
-        Assert.assertEquals(Collections.singletonList(user2),
-                client1.messageList.getContent().getTypingUsers());
-    }
-
-    @Test
-    public void bindTypingUsers_bindingIsActiveOnMessageList() {
-        ListSignal<MessageListUser> typingUsers = new ListSignal<>();
-        typingUsers.insertLast(new MessageListUser("name1"));
-
-        Assert.assertNotNull(client1.messageList.bindTypingUsers(typingUsers));
-        // The binding is registered on the wrapped message list, which then
-        // rejects manually set typing users
-        Assert.assertThrows(BindingActiveException.class,
-                () -> client1.messageList.getContent()
-                        .setTypingUsers(new MessageListUser("name2")));
-    }
-
-    @Test
-    public void addAttachmentClickListener_listenerIsNotifiedOfClick() {
-        MessageList messageList = client1.messageList.getContent();
-        MessageListItem item = new MessageListItem("message");
-        item.addAttachment(new MessageListItem.Attachment("file",
-                "http://localhost/file", "text/plain"));
-        messageList.setItems(item);
-
-        AtomicBoolean clicked = new AtomicBoolean();
-        client1.messageList
-                .addAttachmentClickListener(event -> clicked.set(true));
-        ComponentUtil.fireEvent(messageList,
-                new MessageList.AttachmentClickEvent(messageList, true, 0, 0));
-        Assert.assertTrue(clicked.get());
-    }
-
-    @Test
-    public void setTypingIndicatorType_typeIsPassedToMessageList() {
-        client1.messageList
-                .setTypingIndicatorType(MessageListTypingIndicatorType.MINIMAL);
-        Assert.assertEquals(MessageListTypingIndicatorType.MINIMAL,
-                client1.messageList.getTypingIndicatorType());
-        Assert.assertEquals(MessageListTypingIndicatorType.MINIMAL,
-                client1.messageList.getContent().getTypingIndicatorType());
-    }
-
-    @Test
-    public void setI18n_i18nIsPassedToMessageList() {
-        MessageListI18n i18n = new MessageListI18n()
-                .setTypingIndicatorText("is typing");
-        client1.messageList.setI18n(i18n);
-        Assert.assertSame(i18n, client1.messageList.getI18n());
-        Assert.assertSame(i18n, client1.messageList.getContent().getI18n());
-    }
-
-    @Test
-    public void addThemeVariant_themeIsSetOnMessageList() {
-        client1.messageList.addThemeVariants(MessageListVariant.BUBBLE);
-        Assert.assertTrue(client1.messageList.getContent().getThemeNames()
-                .contains(MessageListVariant.BUBBLE.getVariantName()));
-    }
 }
