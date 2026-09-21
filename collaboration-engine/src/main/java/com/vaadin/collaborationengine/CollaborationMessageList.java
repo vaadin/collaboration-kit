@@ -22,14 +22,23 @@ import java.util.stream.Collectors;
 
 import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageHandler;
 import com.vaadin.collaborationengine.CollaborationAvatarGroup.ImageProvider;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.messages.MessageList;
+import com.vaadin.flow.component.messages.MessageListI18n;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.component.messages.MessageListTypingIndicatorType;
+import com.vaadin.flow.component.messages.MessageListUser;
+import com.vaadin.flow.component.messages.MessageListVariant;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.dom.SignalBinding;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.signals.Signal;
 
 /**
  * Extension of the {@link MessageList} component which integrates with the
@@ -41,8 +50,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  * @since 3.1
  */
-public class CollaborationMessageList extends Composite<MessageList>
-        implements HasSize, HasStyle {
+public class CollaborationMessageList extends Composite<MessageList> implements
+        HasSize, HasStyle, HasTheme, HasThemeVariant<MessageListVariant> {
 
     /**
      * Configurator callback for messages in a {@link CollaborationMessageList}.
@@ -433,6 +442,117 @@ public class CollaborationMessageList extends Composite<MessageList>
      */
     public boolean isAnnounceMessages() {
         return this.getContent().isAnnounceMessages();
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#setTypingUsers(List)}. Sets the
+     * users who are currently typing a message, for whom a typing indicator is
+     * displayed at the end of the list.
+     *
+     * @param typingUsers
+     *            the users who are currently typing, not {@code null}
+     */
+    public void setTypingUsers(List<MessageListUser> typingUsers) {
+        this.getContent().setTypingUsers(typingUsers);
+    }
+
+    /**
+     * Wrapper method for
+     * {@link MessageList#setTypingUsers(MessageListUser...)}. Sets the users
+     * who are currently typing a message, for whom a typing indicator is
+     * displayed at the end of the list.
+     *
+     * @param typingUsers
+     *            the users who are currently typing, not {@code null}
+     */
+    public void setTypingUsers(MessageListUser... typingUsers) {
+        this.getContent().setTypingUsers(typingUsers);
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#getTypingUsers()}. Gets the users
+     * who are currently typing a message.
+     *
+     * @return the users who are currently typing
+     */
+    public List<MessageListUser> getTypingUsers() {
+        return this.getContent().getTypingUsers();
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#bindTypingUsers(Signal)}. Binds the
+     * users who are currently typing a message to the given signal.
+     *
+     * @param typingUsers
+     *            the signal with the users who are currently typing, not
+     *            {@code null}
+     * @param <S>
+     *            the type of the signals in the bound list
+     * @return the signal binding
+     */
+    public <S extends Signal<MessageListUser>> SignalBinding<List<MessageListUser>> bindTypingUsers(
+            Signal<List<S>> typingUsers) {
+        return this.getContent().bindTypingUsers(typingUsers);
+    }
+
+    /**
+     * Wrapper method for
+     * {@link MessageList#setTypingIndicatorType(MessageListTypingIndicatorType)}.
+     * Sets how the typing indicator is displayed.
+     *
+     * @param typingIndicatorType
+     *            the type of the typing indicator, not {@code null}
+     */
+    public void setTypingIndicatorType(
+            MessageListTypingIndicatorType typingIndicatorType) {
+        this.getContent().setTypingIndicatorType(typingIndicatorType);
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#getTypingIndicatorType()}. Gets how
+     * the typing indicator is displayed.
+     *
+     * @return the type of the typing indicator
+     */
+    public MessageListTypingIndicatorType getTypingIndicatorType() {
+        return this.getContent().getTypingIndicatorType();
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#setI18n(MessageListI18n)}. Sets the
+     * internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not {@code null}
+     */
+    public void setI18n(MessageListI18n i18n) {
+        this.getContent().setI18n(i18n);
+    }
+
+    /**
+     * Wrapper method for {@link MessageList#getI18n()}. Gets the
+     * internationalization object previously set for this component.
+     *
+     * @return the i18n object, or {@code null} if the i18n properties haven't
+     *         been set
+     */
+    public MessageListI18n getI18n() {
+        return this.getContent().getI18n();
+    }
+
+    /**
+     * Wrapper method for
+     * {@link MessageList#addAttachmentClickListener(ComponentEventListener)}.
+     * Adds a listener which is notified when the user clicks an attachment of a
+     * message.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addAttachmentClickListener(
+            ComponentEventListener<MessageList.AttachmentClickEvent> listener) {
+        return this.getContent().addAttachmentClickListener(listener);
     }
 
     private void refreshMessages() {
