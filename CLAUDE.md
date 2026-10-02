@@ -111,7 +111,7 @@ The main entry point (`collaboration-engine/src/main/java/com/vaadin/collaborati
 ## Technology Stack
 
 - **Java 21**: Minimum required version
-- **Vaadin Flow 25.3**: UI framework
+- **Vaadin Flow 25.4**: UI framework
 - **Maven**: Build tool
 - **Jetty**: Development server
 - **JUnit 4**: Testing framework
