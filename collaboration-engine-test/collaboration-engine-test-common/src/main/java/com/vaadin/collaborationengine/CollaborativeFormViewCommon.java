@@ -33,7 +33,8 @@ import com.vaadin.flow.shared.communication.PushMode;
 @PreserveOnRefresh
 public class CollaborativeFormViewCommon extends VerticalLayout {
 
-    public static final String TOPIC_ID = "topic";
+    // Prefix differs from other test views to avoid sharing their topics
+    private static final String TOPIC_PREFIX = "form-topic-";
 
     CollaborationAvatarGroup avatars;
 
@@ -45,8 +46,18 @@ public class CollaborativeFormViewCommon extends VerticalLayout {
     CollaborationBinder<Person> binder;
 
     static AtomicInteger userCounter = new AtomicInteger(0);
+
+    // Advanced together with the user counter reset after each test, so
+    // browsers left over from a previous test stay in their own topic
+    static AtomicInteger topicCounter = new AtomicInteger(0);
+
+    private final String topicId = TOPIC_PREFIX + topicCounter.get();
+
     NativeButton resetUserCounter = new NativeButton("Reset user counter",
-            e -> userCounter.set(0));
+            e -> {
+                userCounter.set(0);
+                topicCounter.incrementAndGet();
+            });
 
     public CollaborativeFormViewCommon() {
         addAttachListener(event -> event.getUI().getPushConfiguration()
@@ -56,7 +67,7 @@ public class CollaborativeFormViewCommon extends VerticalLayout {
         UserInfo localUser = new UserInfo("userId-" + userIndex);
         localUser.setName("User " + userIndex);
         localUser.setColorIndex(userIndex);
-        avatars = new CollaborationAvatarGroup(localUser, TOPIC_ID);
+        avatars = new CollaborationAvatarGroup(localUser, topicId);
 
         radioButtonGroup.setItems(Diet.values());
         radioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
@@ -69,7 +80,7 @@ public class CollaborativeFormViewCommon extends VerticalLayout {
                 email);
 
         binder = new CollaborationBinder<>(Person.class, localUser);
-        binder.setTopic(TOPIC_ID, () -> null);
+        binder.setTopic(topicId, () -> null);
         binder.bind(textField, "name");
         binder.bind(checkbox, "married");
         binder.bind(radioButtonGroup, "diet");
@@ -86,7 +97,7 @@ public class CollaborativeFormViewCommon extends VerticalLayout {
                 e -> binder.setTopic(null, Person::new));
         setBinderNull.setId("set-binder-null");
         NativeButton setBinder = new NativeButton("Bind again",
-                e -> binder.setTopic(TOPIC_ID, Person::new));
+                e -> binder.setTopic(topicId, Person::new));
         setBinder.setId("set-binder");
 
         add(detachTextField, attachTextField, setBinderNull, setBinder);
