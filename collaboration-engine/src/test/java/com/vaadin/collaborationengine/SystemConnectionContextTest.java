@@ -125,6 +125,7 @@ public class SystemConnectionContextTest {
         });
 
         Assert.assertEquals(0, CurrentInstance.get(Integer.class).intValue());
+        Assert.assertNull(VaadinService.getCurrent());
     }
 
     @Test(expected = IllegalStateException.class)

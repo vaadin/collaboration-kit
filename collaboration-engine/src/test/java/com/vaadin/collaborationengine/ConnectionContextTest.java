@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,6 +28,7 @@ import com.vaadin.collaborationengine.util.MockService;
 import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.SpyActivationHandler;
 import com.vaadin.collaborationengine.util.TestUtils;
+import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.server.VaadinService;
 
 public class ConnectionContextTest implements Serializable {
@@ -36,6 +38,11 @@ public class ConnectionContextTest implements Serializable {
     private transient MockConnectionContext context;
     private transient SpyActivationHandler spy;
     private transient CollaborationMap map;
+
+    @After
+    public void cleanup() {
+        CurrentInstance.clearAll();
+    }
 
     @Before
     public void init() {
