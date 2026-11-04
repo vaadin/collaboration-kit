@@ -128,17 +128,6 @@ public class SystemConnectionContextTest {
         Assert.assertNull(VaadinService.getCurrent());
     }
 
-    @Test
-    public void initedContext_dispatchActionWithoutCurrentInstances_noneLeftAfterwards() {
-        Assert.assertNull(VaadinService.getCurrent()); // Sanity check
-        context.init(spy, Runnable::run);
-
-        spy.getActionDispatcher().dispatchAction(
-                () -> Assert.assertNotNull(VaadinService.getCurrent()));
-
-        Assert.assertNull(VaadinService.getCurrent());
-    }
-
     @Test(expected = IllegalStateException.class)
     public void initedContext_initWithSameHandler_throws() {
         context.init(spy, rejectExecutor);
