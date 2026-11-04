@@ -125,11 +125,12 @@ public class SystemConnectionContextTest {
         });
 
         Assert.assertEquals(0, CurrentInstance.get(Integer.class).intValue());
+        Assert.assertNull(VaadinService.getCurrent());
     }
 
     @Test
     public void initedContext_dispatchActionWithoutCurrentInstances_noneLeftAfterwards() {
-        CurrentInstance.clearAll();
+        Assert.assertNull(VaadinService.getCurrent()); // Sanity check
         context.init(spy, Runnable::run);
 
         spy.getActionDispatcher().dispatchAction(
