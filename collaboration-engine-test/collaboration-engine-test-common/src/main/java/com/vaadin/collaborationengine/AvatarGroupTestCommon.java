@@ -21,38 +21,42 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 
 import com.vaadin.collaborationengine.util.AbstractCollaborativeFormTestCommon;
+import com.vaadin.collaborationengine.util.UserTagElement;
+import com.vaadin.flow.component.avatar.testbench.AvatarElement;
 
 public class AvatarGroupTestCommon extends AbstractCollaborativeFormTestCommon {
 
     @Test
     public void openAndCloseClients_avatarsUpdated() throws Exception {
-        Assert.assertEquals(
+        assertAvatarNames(
                 "Expected only own avatar when only one client connected",
-                newHashSet("User 1"), client1.getAvatarNames());
+                newHashSet("User 1"), client1);
 
         ClientState client2 = new ClientState(addClient());
 
         String message = "When another client has joined, expected both to have two avatars";
         Set<String> expected = newHashSet("User 1", "User 2");
-        Assert.assertEquals(message, expected, client1.getAvatarNames());
-        Assert.assertEquals(message, expected, client2.getAvatarNames());
+        assertAvatarNames(message, expected, client1);
+        assertAvatarNames(message, expected, client2);
 
         ClientState client3 = new ClientState(addClient());
 
         message = "When three clients joined, expected to see the avatars of the other two";
         expected = newHashSet("User 1", "User 2", "User 3");
-        Assert.assertEquals(message, expected, client1.getAvatarNames());
-        Assert.assertEquals(message, expected, client2.getAvatarNames());
-        Assert.assertEquals(message, expected, client3.getAvatarNames());
+        assertAvatarNames(message, expected, client1);
+        assertAvatarNames(message, expected, client2);
+        assertAvatarNames(message, expected, client3);
 
         close(client2.client);
 
         message = "When one of the three clients closed the window, expected one avatar to remain visible for the other two";
         expected = newHashSet("User 1", "User 3");
-        Assert.assertEquals(message, expected, client1.getAvatarNames());
-        Assert.assertEquals(message, expected, client3.getAvatarNames());
+        assertAvatarNames(message, expected, client1);
+        assertAvatarNames(message, expected, client3);
     }
 
     @Test
@@ -60,16 +64,46 @@ public class AvatarGroupTestCommon extends AbstractCollaborativeFormTestCommon {
         ClientState client2 = new ClientState(addClient());
         client1.focusTextField();
 
+        // Look up the tag and avatar by name instead of by position, so the
+        // check does not depend on which other users are in the topic.
         // Remote driver needs a while until tags are there
-        waitUntil(d -> getUserTags(client2.textField).size() > 0, 3);
+        UserTagElement userTag = waitUntil(d -> getUserTags(client2.textField)
+                .stream().filter(tag -> "User 1".equals(tag.getName()))
+                .findFirst().orElse(null), 3);
 
-        Integer fieldColorIndex = getUserTags(client2.textField).get(0)
-                .getColorIndex();
-        Integer avatarColorIndex = client2.avatars.getAvatarElement(1)
+        Integer fieldColorIndex = userTag.getColorIndex();
+        Integer avatarColorIndex = client2.avatars.$(AvatarElement.class).all()
+                .stream()
+                .filter(avatar -> "User 1"
+                        .equals(avatar.getPropertyString("name")))
+                .findFirst()
+                .orElseThrow(
+                        () -> new AssertionError("Avatar of User 1 not found"))
                 .getPropertyInteger("colorIndex");
 
         Assert.assertNotNull(fieldColorIndex);
         Assert.assertEquals(fieldColorIndex, avatarColorIndex);
+    }
+
+    /**
+     * Presence changes reach the clients asynchronously. For example, a closed
+     * browser stays in the topic until the server processes its disconnection,
+     * so wait for the expected avatars before asserting.
+     */
+    private void assertAvatarNames(String message, Set<String> expected,
+            ClientState client) {
+        try {
+            waitUntil(d -> {
+                try {
+                    return expected.equals(client.getAvatarNames());
+                } catch (StaleElementReferenceException e) {
+                    return false;
+                }
+            }, 10);
+        } catch (TimeoutException e) {
+            // Fall through to the assertion for a descriptive failure
+        }
+        Assert.assertEquals(message, expected, client.getAvatarNames());
     }
 
     private <E> Set<E> newHashSet(E... items) {
