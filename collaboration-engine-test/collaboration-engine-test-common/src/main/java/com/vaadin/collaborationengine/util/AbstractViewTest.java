@@ -123,7 +123,10 @@ public abstract class AbstractViewTest extends TestBenchTestCase {
             options.setBinary(chromeBinary);
         }
         if (isHeadless) {
-            options.addArguments("--headless=new");
+            // Headless Chrome defaults to a small 800x600 window, where
+            // clicking buttons scrolls fields out of view, which affects
+            // features that depend on visibility, such as user tags
+            options.addArguments("--headless=new", "--window-size=1920,1080");
         }
         logger.info("Using Local Chrome with Capabilities: " + options.asMap());
         TestBenchDriverProxy driver = TestBench
