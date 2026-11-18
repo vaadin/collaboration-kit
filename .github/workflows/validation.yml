@@ -64,6 +64,7 @@ jobs:
             -DuseLocalWebDriver \
             -Dheadless \
             -Dwebdriver.chrome.driver="${{ steps.setup-chrome.outputs.chromedriver-path }}" \
+            -Dchrome.binary="${{ steps.setup-chrome.outputs.chrome-path }}" \
             $EXTRA_ARGS
 
       - name: Upload test reports

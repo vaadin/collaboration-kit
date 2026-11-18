@@ -116,6 +116,12 @@ public abstract class AbstractViewTest extends TestBenchTestCase {
     private WebDriver createChromeDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
+        // Allows using a specific Chrome installation instead of the one
+        // ChromeDriver finds by default, e.g. to match the ChromeDriver version
+        String chromeBinary = System.getProperty("chrome.binary");
+        if (chromeBinary != null && !chromeBinary.isBlank()) {
+            options.setBinary(chromeBinary);
+        }
         if (isHeadless) {
             options.addArguments("--headless=new");
         }
