@@ -1,0 +1,79 @@
+name: Validation
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TB_LICENSE: ${{ secrets.TB_LICENSE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Install latest Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+          install-chromedriver: true
+
+      - name: Show browser versions
+        run: |
+          "${{ steps.setup-chrome.outputs.chrome-path }}" --version
+          "${{ steps.setup-chrome.outputs.chromedriver-path }}" --version
+
+      - name: Configure TestBench license
+        if: env.TB_LICENSE != ''
+        run: |
+          mkdir -p ~/.vaadin
+          user="${TB_LICENSE%%/*}"
+          key="${TB_LICENSE#*/}"
+          echo "{\"username\":\"$user\",\"proKey\":\"$key\"}" > ~/.vaadin/proKey
+
+      - name: Check formatting
+        run: mvn -B -ntp spotless:check
+
+      - name: Build and run tests
+        run: |
+          # Integration tests need a TestBench license, which is not
+          # available to pull requests from forks.
+          if [ -z "$TB_LICENSE" ]; then
+            echo "::warning::TB_LICENSE is not available, skipping integration tests"
+            EXTRA_ARGS="-DskipITs"
+          fi
+          mvn -B -ntp verify \
+            -DuseLocalWebDriver \
+            -Dheadless \
+            -Dwebdriver.chrome.driver="${{ steps.setup-chrome.outputs.chromedriver-path }}" \
+            $EXTRA_ARGS
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-reports
+          path: |
+            **/target/surefire-reports/
+            **/target/failsafe-reports/
+            **/error-screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
