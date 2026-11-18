@@ -172,6 +172,35 @@ public class FieldHighlightTestCommon
         assertNoUserTags(client1.textField);
 
         client1.rebind();
+        // TEMPORARY DIAGNOSTICS
+        for (int i = 0; i < 12; i++) {
+            Object state = executeScript(
+                    """
+                            const tf = arguments[0];
+                            const ut = (tf.shadowRoot && tf.shadowRoot.querySelector('vaadin-user-tags')) || tf.querySelector('vaadin-user-tags');
+                            if (!ut) return 'no user-tags';
+                            const ov = ut.$ && ut.$.overlay;
+                            return JSON.stringify({
+                              t: Date.now() % 100000,
+                              vis: document.visibilityState,
+                              flashing: ut.flashing, opened: ut.opened, hasFocus: ut.hasFocus,
+                              targetVisible: ut.__isTargetVisible,
+                              queue: (ut.__flashQueue || []).map(q => q.map(t => t.name)),
+                              users: (ut.users || []).map(u => u.name),
+                              children: Array.from(ut.children).map(c => c.name + ':' + c.className + ':' + c.style.display),
+                              ovOpened: ov && ov.opened,
+                              ovAttrs: ov && Array.from(ov.attributes).map(a => a.name).join(','),
+                              ovPopover: ov && ov.matches(':popover-open'),
+                              ovAnims: ov && ov.getAnimations().map(a => a.animationName + ':' + a.playState),
+                              flashStartActive: ut._debounceFlashStart && ut._debounceFlashStart.isActive(),
+                              flashEndActive: ut._debounceFlashEnd && ut._debounceFlashEnd.isActive(),
+                              closingHandler: ov && typeof ov.__closingHandler,
+                            });
+                            """,
+                    client1.textField);
+            System.out.println("DIAG clientClear " + i + ": " + state);
+            Thread.sleep(500);
+        }
         assertUserTags(client1.textField, "User 2");
 
         client2.focusCheckbox();
