@@ -47,6 +47,12 @@
 
         <!-- plugin versions -->
         <spotless.plugin.version>2.43.0</spotless.plugin.version>
+        <jandex.plugin.version>3.6.0</jandex.plugin.version>
+        <!-- Owned by Flow: keep jandex.format.version equal to the value in the
+            Flow root POM for the flow.version in use, so that the Collaboration
+            Engine index uses the same index format as the Flow ones. Do not
+            change it on its own. -->
+        <jandex.format.version>13</jandex.format.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/apache2-license-header.txt</spotless.licence-header>
     </properties>
 
@@ -218,6 +224,26 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-war-plugin</artifactId>
                     <version>3.3.1</version>
+                </plugin>
+                <!-- Indexes a module's own classes into META-INF/jandex.idx, which
+                    is where the Quarkus extension reads them from. A published
+                    module opts in by declaring this plugin in its own build,
+                    with no configuration of its own. -->
+                <plugin>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>jandex-maven-plugin</artifactId>
+                    <version>${jandex.plugin.version}</version>
+                    <configuration>
+                        <indexVersion>${jandex.format.version}</indexVersion>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-index</id>
+                            <goals>
+                                <goal>jandex</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

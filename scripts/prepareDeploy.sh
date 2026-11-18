@@ -22,7 +22,7 @@ getLatest() {
 
 getPlatformVersion() {
   name=$1
-  [ "$1" = accordion ] && javaVersion="jsVersion" || javaVersion="javaVersion"
+  javaVersion="javaVersion"
 
   echo "$versions" | jq -r ".core, .vaadin | .[\"$name\"]| .$javaVersion " | grep -v null
 }
@@ -81,12 +81,13 @@ versions=`curl -s "https://raw.githubusercontent.com/vaadin/platform/$branch/ver
 flow=`getPlatformVersion flow`
 flow=`getLatest flow $flow`
 
-### Compute cdi version
-cdi=`getPlatformVersion flow-cdi`
-cdi=`getLatest vaadin-cdi $cdi`
+### Compute cdi version, vaadin-cdi is released together with flow
+cdi=$flow
 
-### Compute cdi version
-component=`getPlatformVersion accordion`
+### Compute component version
+component=`getPlatformVersion flow-components`
+# versions.json uses a {{version}} placeholder for flow-components, fall back to the version being released
+[[ -z "$component" || "$component" == *"{{"* ]] && component=$version
 component=`getLatest vaadin-flow-components-shared-parent $component`
 
 ## Modify poms with the versions to release
@@ -94,7 +95,6 @@ echo "Setting version=$version to collaboration-engine-internal"
 mvn -B -q versions:set -DnewVersion=$version -DgenerateBackupPoms=false|| exit 1
 
 setPomVersion flow $flow
-setPomVersion flow.cdi $cdi
 setPomVersion vaadin.component $component || exit 1
 
 

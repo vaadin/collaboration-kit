@@ -64,6 +64,9 @@ public class SystemConnectionContext implements ConnectionContext {
                             getCollaborationEngine().getVaadinService());
                     action.execute();
                 } finally {
+                    // Restoring alone would leave the service set when
+                    // nothing was current before
+                    CurrentInstance.clearAll();
                     CurrentInstance.restoreInstances(oldInstances);
                 }
             });
