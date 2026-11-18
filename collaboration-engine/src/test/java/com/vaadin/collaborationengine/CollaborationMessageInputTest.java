@@ -146,6 +146,19 @@ public class CollaborationMessageInputTest {
         Assert.assertFalse(client1.isEnabled());
     }
 
+    @Test
+    public void setSubmitDisabled_delegatesToMessageInput() {
+        CollaborationMessageInput messageInput = client1.messageInput;
+        Assert.assertFalse(messageInput.isSubmitDisabled());
+
+        messageInput.setSubmitDisabled(true);
+        Assert.assertTrue(messageInput.isSubmitDisabled());
+        Assert.assertTrue(messageInput.getContent().isSubmitDisabled());
+
+        messageInput.setSubmitDisabled(false);
+        Assert.assertFalse(messageInput.getContent().isSubmitDisabled());
+    }
+
     private static List<String> blackListedMethods = Arrays
             .asList("addSubmitListener", "isEnabled", "setEnabled");
 
