@@ -100,8 +100,10 @@ class BeaconHandler extends SynchronizedRequestHandler {
     }
 
     private static String getUnloadScript() {
+        // Uses 'pagehide' since browsers are removing support for the
+        // 'unload' event, e.g. recent Chrome versions no longer fire it
         //@formatter:off
-        return "window.addEventListener('unload', function() {"
+        return "window.addEventListener('pagehide', function() {"
                 + "  if (navigator.sendBeacon) {"
                 + "    navigator.sendBeacon($0);"
                 + "  } else {"
