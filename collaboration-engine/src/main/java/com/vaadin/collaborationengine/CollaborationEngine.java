@@ -41,6 +41,7 @@ import com.vaadin.collaborationengine.Backend.EventLog;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.CurrentInstance;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinService;
@@ -247,7 +248,18 @@ public class CollaborationEngine {
 
         vaadinService.addServiceDestroyListener(event -> {
             ce.active.set(false);
-            ce.clearConnections();
+            // Deactivation callbacks may look up the engine through the
+            // current service, which is not set while the service is
+            // destroyed
+            Map<Class<?>, CurrentInstance> oldInstances = CurrentInstance
+                    .getInstances();
+            try {
+                VaadinService.setCurrent(vaadinService);
+                ce.clearConnections();
+            } finally {
+                CurrentInstance.clearAll();
+                CurrentInstance.restoreInstances(oldInstances);
+            }
             if (useManagedExecutorService) {
                 LOGGER.info("Shutting down thread pool");
                 ce.executorService.shutdown();
