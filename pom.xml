@@ -36,7 +36,7 @@
 
         <!-- Versions to keep in sync with the targeted platform version: -->
         <!-- spring,cdi versions has been moved to test module. -->
-        <flow.version>25.4-SNAPSHOT</flow.version>
+        <flow.version>25.5-SNAPSHOT</flow.version>
         <vaadin.component.version>25.4-SNAPSHOT</vaadin.component.version>
         <vaadin.lumo.version>${vaadin.component.version}</vaadin.lumo.version>
 
