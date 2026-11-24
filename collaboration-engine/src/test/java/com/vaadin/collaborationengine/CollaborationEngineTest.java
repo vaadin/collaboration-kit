@@ -418,6 +418,25 @@ public class CollaborationEngineTest {
     }
 
     @Test
+    public void serviceDestroy_noCurrentService_deactivationCanGetInstance() {
+        VaadinService service = new MockService();
+        TestCollaborationEngine ce = TestUtil
+                .createTestCollaborationEngine(service);
+        AtomicReference<CollaborationEngine> instance = new AtomicReference<>();
+        ce.openTopicConnection(MockConnectionContext.createEager(), "topic",
+                new UserInfo("id"),
+                conn -> () -> instance.set(CollaborationEngine.getInstance()));
+        VaadinService.setCurrent(null);
+
+        service.destroy();
+
+        Assert.assertSame("Deactivation should find the engine", ce,
+                instance.get());
+        Assert.assertNull("The service should not stay current",
+                VaadinService.getCurrent());
+    }
+
+    @Test
     public void serviceDestroy_ExecutorServiceShutdown_closesConnections_timeout() {
         VaadinService service = new MockService();
         TestCollaborationEngine ce = TestUtil
