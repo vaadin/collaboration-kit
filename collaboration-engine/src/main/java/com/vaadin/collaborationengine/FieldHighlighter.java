@@ -86,10 +86,8 @@ class FieldHighlighter extends FieldHighlighterInitializer
     void setEditors(HasValue<?, ?> field, List<FocusedEditor> editors,
             UserInfo localUser) {
         if (field instanceof HasElement hasElement) {
-            hasElement.getElement().executeJs(
-                    "customElements.get('vaadin-field-highlighter')"
-                            + ".setUsers(this, $0)",
-                    serialize(editors.stream()
+            hasElement.getElement().executeJs(FieldHighlighterJs.class)
+                    .setUsers(serialize(editors.stream()
                             .filter(editor -> !editor.user.equals(localUser))));
         }
     }
@@ -100,19 +98,15 @@ class FieldHighlighter extends FieldHighlighterInitializer
 
     void addEditor(HasValue<?, ?> field, UserInfo user, int fieldIndex) {
         if (field instanceof HasElement hasElement) {
-            hasElement.getElement().executeJs(
-                    "customElements.get('vaadin-field-highlighter')"
-                            + ".addUser(this, $0)",
-                    serialize(user, fieldIndex));
+            hasElement.getElement().executeJs(FieldHighlighterJs.class)
+                    .addUser(serialize(user, fieldIndex));
         }
     }
 
     void removeEditor(HasValue<?, ?> field, UserInfo user, int fieldIndex) {
         if (field instanceof HasElement hasElement) {
-            hasElement.getElement().executeJs(
-                    "customElements.get('vaadin-field-highlighter')"
-                            + ".removeUser(this, $0)",
-                    serialize(user, fieldIndex));
+            hasElement.getElement().executeJs(FieldHighlighterJs.class)
+                    .removeUser(serialize(user, fieldIndex));
         }
     }
 
