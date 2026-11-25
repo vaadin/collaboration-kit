@@ -73,8 +73,8 @@ class BeaconHandler extends SynchronizedRequestHandler {
 
         BeaconHandler newBeaconHandler = new BeaconHandler(beaconPath);
 
-        ui.getElement().executeJs(getUnloadScript(),
-                newBeaconHandler.createBeaconUrl());
+        ui.getElement().executeJs(BeaconHandlerJs.class)
+                .installUnloadBeacon(newBeaconHandler.createBeaconUrl());
 
         VaadinSession session = ui.getSession();
         session.removeRequestHandler(null);
@@ -97,22 +97,6 @@ class BeaconHandler extends SynchronizedRequestHandler {
 
     private static String formatParameter(String name, String value) {
         return name + "=" + value;
-    }
-
-    private static String getUnloadScript() {
-        // Uses 'pagehide' since browsers are removing support for the
-        // 'unload' event, e.g. recent Chrome versions no longer fire it
-        //@formatter:off
-        return "window.addEventListener('pagehide', function() {"
-                + "  if (navigator.sendBeacon) {"
-                + "    navigator.sendBeacon($0);"
-                + "  } else {"
-                + "    var xhr = new XMLHttpRequest();"
-                + "    xhr.open(\"POST\", $0, false);"
-                + "    xhr.send(\"\");"
-                + "  }"
-                + "})";
-        //@formatter:on
     }
 
     @Override
