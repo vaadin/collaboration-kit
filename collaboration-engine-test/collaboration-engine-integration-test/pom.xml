@@ -84,6 +84,12 @@
                     <webApp>
                         <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
                     </webApp>
+                    <systemProperties>
+                        <!-- Fail on any JavaScript sent as a string, and send
+                        a strict Content Security Policy header, so that a
+                        call that needs unsafe-eval is caught by the ITs -->
+                        <vaadin.contentSecurityPolicy>strict</vaadin.contentSecurityPolicy>
+                    </systemProperties>
                 </configuration>
             </plugin>
             <!--
