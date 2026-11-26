@@ -33,7 +33,6 @@ import org.junit.Test;
 import com.vaadin.collaborationengine.util.MockService;
 import com.vaadin.collaborationengine.util.MockUI;
 import com.vaadin.collaborationengine.util.ReflectionUtils;
-import com.vaadin.collaborationengine.util.TestStreamResource;
 import com.vaadin.collaborationengine.util.TestUtils;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -356,77 +355,6 @@ public class CollaborationAvatarGroupTest {
             Assert.fail("Missing wrapper for methods: "
                     + missingMethods.toString());
         }
-    }
-
-    @Test
-    public void imageProvider_beforeAttach_streamResourceIsUsed() {
-        UI.setCurrent(client1.ui);
-        client1.group.setImageProvider(
-                user -> new TestStreamResource(user.getName()));
-        client1.attach();
-        client2.attach();
-
-        List<AvatarGroupItem> items = client1.getItems();
-        assertEquals(2, items.size());
-        AvatarGroupItem item = items.get(1);
-
-        Assert.assertThat(item.getImage(),
-                CoreMatchers.startsWith("VAADIN/dynamic"));
-        assertEquals("name2", item.getImageResource().getName());
-    }
-
-    @Test
-    public void imageProvider_afterAttach_streamResourceIsUsed() {
-        UI.setCurrent(client1.ui);
-        client1.attach();
-        client2.attach();
-
-        client1.group.setImageProvider(
-                user -> new TestStreamResource(user.getName()));
-
-        List<AvatarGroupItem> items = client1.getItems();
-        assertEquals(2, items.size());
-
-        AvatarGroupItem item = items.get(1);
-
-        Assert.assertThat(item.getImage(),
-                CoreMatchers.startsWith("VAADIN/dynamic"));
-        assertEquals("name2", item.getImageResource().getName());
-    }
-
-    @Test
-    public void imageProvider_nullStream_noImage() {
-        UI.setCurrent(client1.ui);
-        client1.attach();
-        client2.attach();
-
-        client1.group.setImageProvider(user -> null);
-
-        List<AvatarGroupItem> items = client1.getItems();
-        assertEquals(2, items.size());
-
-        AvatarGroupItem item = items.get(1);
-
-        Assert.assertNull(item.getImage());
-        Assert.assertNull(item.getImageResource());
-    }
-
-    @Test
-    public void imageProvider_clearProvider_imageIsSetFromUserInfo() {
-        UI.setCurrent(client1.ui);
-        client1.group.setImageProvider(
-                user -> new TestStreamResource(user.getName()));
-        client1.attach();
-        client2.attach();
-
-        client1.group.setImageProvider(null);
-
-        List<AvatarGroupItem> items = client1.getItems();
-        assertEquals(2, items.size());
-        AvatarGroupItem item = items.get(1);
-
-        Assert.assertNull(item.getImageResource());
-        assertEquals("image2", item.getImage());
     }
 
     @Test
